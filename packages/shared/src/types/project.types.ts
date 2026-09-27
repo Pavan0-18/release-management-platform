@@ -1,5 +1,10 @@
 import { Release } from './release.types';
 
+export enum ProjectNature {
+  MONOLITH = 'MONOLITH',
+  MICROSERVICES = 'MICROSERVICES',
+}
+
 export interface DefaultChecklistItem {
   title: string;
   description?: string;
@@ -11,6 +16,8 @@ export interface Project {
   name: string;
   key: string;
   description?: string | null;
+  nature: ProjectNature;
+  services?: string[] | null;
   defaultChecklist?: DefaultChecklistItem[] | null;
   releases?: Release[];
   totalReleases?: number;
@@ -22,6 +29,8 @@ export interface CreateProjectInput {
   name: string;
   key: string;
   description?: string;
+  nature?: ProjectNature;
+  services?: string[];
   defaultChecklist?: DefaultChecklistItem[];
 }
 
@@ -30,5 +39,7 @@ export interface UpdateProjectInput {
   name?: string;
   key?: string;
   description?: string;
+  nature?: ProjectNature;
+  services?: string[];
   defaultChecklist?: DefaultChecklistItem[];
 }

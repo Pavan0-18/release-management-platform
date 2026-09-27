@@ -17,10 +17,13 @@ const GET_RELEASES_GQL = `
     releases(filter: $filter) {
       id
       projectId
+      serviceName
       project {
         id
         name
         key
+        nature
+        services
       }
       name
       version
@@ -41,10 +44,13 @@ const GET_RELEASE_GQL = `
     release(id: $id) {
       id
       projectId
+      serviceName
       project {
         id
         name
         key
+        nature
+        services
         defaultChecklist {
           title
           description
@@ -80,10 +86,13 @@ const CREATE_RELEASE_GQL = `
     createRelease(input: $input) {
       id
       projectId
+      serviceName
       project {
         id
         name
         key
+        nature
+        services
       }
       name
       version
@@ -101,6 +110,7 @@ const UPDATE_RELEASE_GQL = `
   mutation UpdateRelease($input: UpdateReleaseInput!) {
     updateRelease(input: $input) {
       id
+      serviceName
       name
       version
       description
@@ -149,6 +159,7 @@ const DELETE_RELEASE_STEP_GQL = `
 
 export interface ReleaseFilterParams {
   projectId?: string;
+  serviceName?: string;
   status?: ReleaseStatus;
   search?: string;
 }
@@ -169,6 +180,7 @@ export function useReleases(filter?: ReleaseFilterParams) {
       const data = await requestGraphQL<{ releases: Release[] }>(GET_RELEASES_GQL, {
         filter: {
           projectId: filter?.projectId || undefined,
+          serviceName: filter?.serviceName || undefined,
           status: filter?.status || undefined,
           search: filter?.search || undefined,
         },

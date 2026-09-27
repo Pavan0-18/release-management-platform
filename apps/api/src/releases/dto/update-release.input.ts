@@ -11,6 +11,11 @@ export class UpdateReleaseInput {
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
+  serviceName?: string;
+
+  @Field(() => String, { nullable: true })
+  @IsString()
+  @IsOptional()
   name?: string;
 
   @Field(() => String, { nullable: true })

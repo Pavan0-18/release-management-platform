@@ -5,6 +5,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { ProjectNature } from '@rmp/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectInput } from './dto/create-project.input';
 import { UpdateProjectInput } from './dto/update-project.input';
@@ -34,6 +35,8 @@ export class ProjectsService {
       name: project.name,
       key: project.key,
       description: project.description,
+      nature: project.nature as unknown as ProjectNature,
+      services: (project.services as string[]) || [],
       defaultChecklist: (project.defaultChecklist as any) || [],
       totalReleases: project._count.releases,
       createdAt: project.createdAt,
@@ -86,6 +89,8 @@ export class ProjectsService {
       name: project.name,
       key: project.key,
       description: project.description,
+      nature: project.nature as unknown as ProjectNature,
+      services: (project.services as string[]) || [],
       defaultChecklist: (project.defaultChecklist as any) || [],
       releases: mappedReleases,
       totalReleases: project._count.releases,
@@ -117,6 +122,8 @@ export class ProjectsService {
       name: project.name,
       key: project.key,
       description: project.description,
+      nature: project.nature as unknown as ProjectNature,
+      services: (project.services as string[]) || [],
       defaultChecklist: (project.defaultChecklist as any) || [],
       totalReleases: project._count.releases,
       createdAt: project.createdAt,
@@ -144,6 +151,8 @@ export class ProjectsService {
         name: input.name.trim(),
         key: normalizedKey,
         description: input.description?.trim() || null,
+        nature: input.nature || 'MONOLITH',
+        services: input.services ? (input.services as any) : null,
         defaultChecklist: input.defaultChecklist ? (input.defaultChecklist as any) : null,
       },
       include: {
@@ -160,6 +169,8 @@ export class ProjectsService {
       name: project.name,
       key: project.key,
       description: project.description,
+      nature: project.nature as unknown as ProjectNature,
+      services: (project.services as string[]) || [],
       defaultChecklist: (project.defaultChecklist as any) || [],
       totalReleases: 0,
       createdAt: project.createdAt,
@@ -199,6 +210,8 @@ export class ProjectsService {
         key: normalizedKey,
         description:
           input.description !== undefined ? input.description?.trim() || null : undefined,
+        nature: input.nature !== undefined ? input.nature : undefined,
+        services: input.services !== undefined ? (input.services as any) : undefined,
         defaultChecklist:
           input.defaultChecklist !== undefined ? (input.defaultChecklist as any) : undefined,
       },
@@ -216,6 +229,8 @@ export class ProjectsService {
       name: updated.name,
       key: updated.key,
       description: updated.description,
+      nature: updated.nature as unknown as ProjectNature,
+      services: (updated.services as string[]) || [],
       defaultChecklist: (updated.defaultChecklist as any) || [],
       totalReleases: updated._count.releases,
       createdAt: updated.createdAt,

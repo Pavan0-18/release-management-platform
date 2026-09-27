@@ -9,6 +9,11 @@ export class FilterReleasesInput {
   @IsOptional()
   projectId?: string;
 
+  @Field(() => String, { nullable: true, description: 'Filter releases by microservice name' })
+  @IsString()
+  @IsOptional()
+  serviceName?: string;
+
   @Field(() => ReleaseStatus, { nullable: true })
   @IsEnum(ReleaseStatus)
   @IsOptional()

@@ -14,6 +14,12 @@ export class ReleaseModel {
   @Field(() => ProjectModel, { nullable: true, description: 'Parent project' })
   project?: ProjectModel;
 
+  @Field(() => String, {
+    nullable: true,
+    description: 'Microservice name for service-specific releases',
+  })
+  serviceName?: string | null;
+
   @Field(() => String, { description: 'Name of the release' })
   name!: string;
 

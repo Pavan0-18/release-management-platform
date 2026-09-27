@@ -26,6 +26,14 @@ export class CreateReleaseInput {
   @IsNotEmpty({ message: 'Project ID is required' })
   projectId!: string;
 
+  @Field(() => String, {
+    nullable: true,
+    description: 'Specific microservice name if project is microservices-based',
+  })
+  @IsString()
+  @IsOptional()
+  serviceName?: string;
+
   @Field(() => String)
   @IsString()
   @IsNotEmpty({ message: 'Release name is required' })

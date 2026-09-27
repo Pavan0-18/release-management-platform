@@ -1,58 +1,44 @@
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { ProjectSidebar } from './ProjectSidebar';
 
 export const AppLayout: React.FC = () => {
   return (
     <div
-      className="app-container"
-      style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}
+      style={{
+        display: 'flex',
+        minHeight: '100vh',
+        height: '100vh',
+        overflow: 'hidden',
+        backgroundColor: 'var(--bg-primary)',
+      }}
     >
-      {/* Top Navbar */}
-      <header className="header" style={{ height: '65px' }}>
-        <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <div className="logo-group">
-            <div className="logo-badge">RM</div>
-            <div>
-              <h1 className="logo-title">Release Management Platform</h1>
-            </div>
-          </div>
-        </Link>
-        <nav style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <a
-            href="http://localhost:3000/graphql"
-            target="_blank"
-            rel="noreferrer"
-            className="nav-link"
-          >
-            GraphQL API
-          </a>
-        </nav>
-      </header>
+      {/* Full-Height Left Sidebar */}
+      <ProjectSidebar />
 
-      {/* Main Container with Sidebar + Content */}
-      <div style={{ display: 'flex', flex: 1, alignItems: 'stretch' }}>
-        <ProjectSidebar />
+      {/* Right Main Scrollable Viewport */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minWidth: 0,
+          height: '100vh',
+          overflowY: 'auto',
+        }}
+      >
         <main
           style={{
             flex: 1,
-            padding: '2rem',
+            padding: '1.5rem 2rem',
             maxWidth: '1200px',
             width: '100%',
             margin: '0 auto',
-            overflowY: 'auto',
           }}
         >
           <Outlet />
         </main>
       </div>
-
-      <footer className="footer">
-        <p>
-          Release Management Platform &copy; {new Date().getFullYear()} &bull; Production Release
-          Governance & Multi-Project Scoping
-        </p>
-      </footer>
     </div>
   );
 };

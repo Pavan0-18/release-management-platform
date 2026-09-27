@@ -49,6 +49,10 @@ export class ReleasesService {
       where.projectId = filter.projectId;
     }
 
+    if (filter?.serviceName) {
+      where.serviceName = filter.serviceName;
+    }
+
     if (filter?.status) {
       where.status = filter.status;
     }
@@ -57,6 +61,7 @@ export class ReleasesService {
       where.OR = [
         { name: { contains: filter.search, mode: 'insensitive' } },
         { version: { contains: filter.search, mode: 'insensitive' } },
+        { serviceName: { contains: filter.search, mode: 'insensitive' } },
         { description: { contains: filter.search, mode: 'insensitive' } },
       ];
     }
@@ -94,7 +99,7 @@ export class ReleasesService {
   }
 
   async create(input: CreateReleaseInput): Promise<ReleaseModel> {
-    const { projectId, name, version, description, targetDate, steps } = input;
+    const { projectId, serviceName, name, version, description, targetDate, steps } = input;
 
     // Verify parent project exists
     const project = await this.prisma.project.findUnique({
@@ -105,19 +110,23 @@ export class ReleasesService {
       throw new NotFoundException(`Project with ID "${projectId}" not found`);
     }
 
-    // Check version uniqueness within this project
-    const existingRelease = await this.prisma.release.findUnique({
+    const normalizedServiceName = serviceName?.trim() || null;
+
+    // Check version uniqueness within this project (and service if microservices)
+    const existingRelease = await this.prisma.release.findFirst({
       where: {
-        projectId_version: {
-          projectId,
-          version: version.trim(),
-        },
+        projectId,
+        serviceName: normalizedServiceName,
+        version: version.trim(),
       },
     });
 
     if (existingRelease) {
+      const targetLabel = normalizedServiceName
+        ? `service "${normalizedServiceName}" in project "${project.name}"`
+        : `project "${project.name}"`;
       throw new ConflictException(
-        `A release with version "${version}" already exists in project "${project.name}"`,
+        `A release with version "${version}" already exists for ${targetLabel}`,
       );
     }
 
@@ -153,6 +162,7 @@ export class ReleasesService {
     const release = await this.prisma.release.create({
       data: {
         projectId,
+        serviceName: normalizedServiceName,
         name: name.trim(),
         version: version.trim(),
         description: description?.trim() || null,
@@ -170,7 +180,7 @@ export class ReleasesService {
     });
 
     this.logger.log(
-      `Created release "${release.name}" (${release.version}) in project "${project.name}" with ${stepsToCreate.length} steps`,
+      `Created release "${release.name}" (${release.version}${normalizedServiceName ? ` - ${normalizedServiceName}` : ''}) in project "${project.name}" with ${stepsToCreate.length} steps`,
     );
     return this.mapReleaseMetrics(release);
   }
@@ -184,6 +194,7 @@ export class ReleasesService {
     const updated = await this.prisma.release.update({
       where: { id },
       data: {
+        serviceName: data.serviceName !== undefined ? data.serviceName?.trim() || null : undefined,
         name: data.name !== undefined ? data.name.trim() : undefined,
         version: data.version !== undefined ? data.version.trim() : undefined,
         description: data.description !== undefined ? data.description?.trim() || null : undefined,

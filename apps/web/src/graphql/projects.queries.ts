@@ -5,6 +5,8 @@ export const GET_PROJECTS_GQL = `
       name
       key
       description
+      nature
+      services
       defaultChecklist {
         title
         description
@@ -24,6 +26,8 @@ export const GET_PROJECT_GQL = `
       name
       key
       description
+      nature
+      services
       defaultChecklist {
         title
         description
@@ -32,6 +36,7 @@ export const GET_PROJECT_GQL = `
       totalReleases
       releases {
         id
+        serviceName
         name
         version
         description
@@ -56,6 +61,8 @@ export const CREATE_PROJECT_GQL = `
       name
       key
       description
+      nature
+      services
       defaultChecklist {
         title
         description
@@ -74,6 +81,8 @@ export const UPDATE_PROJECT_GQL = `
       name
       key
       description
+      nature
+      services
       defaultChecklist {
         title
         description

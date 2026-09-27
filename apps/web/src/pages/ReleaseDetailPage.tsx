@@ -105,8 +105,42 @@ export const ReleaseDetailPage: React.FC = () => {
                 alignItems: 'center',
                 gap: '0.6rem',
                 marginBottom: '0.35rem',
+                flexWrap: 'wrap',
               }}
             >
+              {release.project && (
+                <Link
+                  to={`/projects/${release.project.id}`}
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    backgroundColor: 'var(--accent-primary)',
+                    color: '#ffffff',
+                    padding: '0.2rem 0.5rem',
+                    borderRadius: '4px',
+                    textDecoration: 'none',
+                  }}
+                >
+                  {release.project.key}
+                </Link>
+              )}
+
+              {release.serviceName && (
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    backgroundColor: '#e0f2fe',
+                    color: '#0369a1',
+                    padding: '0.2rem 0.5rem',
+                    borderRadius: '4px',
+                    border: '1px solid #bae6fd',
+                  }}
+                >
+                  ⚙️ {release.serviceName}
+                </span>
+              )}
+
               <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                 {release.name}
               </h2>

@@ -62,6 +62,7 @@ describe('ReleasesService', () => {
     release: {
       findMany: jest.fn().mockResolvedValue([mockRelease]),
       findUnique: jest.fn().mockResolvedValue(mockRelease),
+      findFirst: jest.fn().mockResolvedValue(null),
       create: jest.fn().mockResolvedValue(mockRelease),
       update: jest.fn().mockResolvedValue(mockRelease),
       delete: jest.fn().mockResolvedValue(mockRelease),
@@ -76,6 +77,12 @@ describe('ReleasesService', () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    mockPrismaService.release.findUnique.mockResolvedValue(mockRelease);
+    mockPrismaService.release.findFirst.mockResolvedValue(null);
+    mockPrismaService.release.findMany.mockResolvedValue([mockRelease]);
+    mockPrismaService.project.findUnique.mockResolvedValue(mockProject);
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ReleasesService,
@@ -119,7 +126,6 @@ describe('ReleasesService', () => {
 
   describe('create', () => {
     it('should create a new release with steps', async () => {
-      jest.spyOn(prisma.release, 'findUnique').mockResolvedValueOnce(null); // uniqueness check
       const result = await service.create({
         projectId: 'proj-123',
         name: 'New Release',
@@ -133,6 +139,7 @@ describe('ReleasesService', () => {
 
   describe('addStep', () => {
     it('should add a verification step to an existing release', async () => {
+      jest.spyOn(prisma.release, 'findUnique').mockResolvedValue(mockRelease as any);
       const result = await service.addStep({
         releaseId: 'rel-123',
         title: 'Run performance benchmarks',

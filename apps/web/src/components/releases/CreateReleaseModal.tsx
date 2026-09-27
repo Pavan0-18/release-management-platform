@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ProjectNature } from '@rmp/shared';
 import { useProjects } from '../../hooks/useProjects';
 import { useCreateRelease } from '../../hooks/useReleases';
 import { Modal, Input, Textarea, DatePicker, Select, Button } from '../common/form';
@@ -7,6 +8,7 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   defaultProjectId?: string;
+  defaultServiceName?: string;
   onSuccess?: (releaseId: string) => void;
 }
 
@@ -14,10 +16,12 @@ export const CreateReleaseModal: React.FC<Props> = ({
   isOpen,
   onClose,
   defaultProjectId,
+  defaultServiceName,
   onSuccess,
 }) => {
   const { data: projects = [] } = useProjects();
   const [selectedProjectId, setSelectedProjectId] = useState<string>(defaultProjectId || '');
+  const [selectedService, setSelectedService] = useState<string>(defaultServiceName || '');
   const [name, setName] = useState('');
   const [version, setVersion] = useState('');
   const [description, setDescription] = useState('');
@@ -29,6 +33,10 @@ export const CreateReleaseModal: React.FC<Props> = ({
 
   const createMutation = useCreateRelease();
 
+  const currentProject = projects.find((p) => p.id === selectedProjectId);
+  const isMicroservices = currentProject?.nature === ProjectNature.MICROSERVICES;
+  const projectServices = currentProject?.services || [];
+
   // Set default project if only one exists or default is passed
   useEffect(() => {
     if (defaultProjectId) {
@@ -37,6 +45,14 @@ export const CreateReleaseModal: React.FC<Props> = ({
       setSelectedProjectId(projects[0].id);
     }
   }, [defaultProjectId, projects, selectedProjectId]);
+
+  useEffect(() => {
+    if (defaultServiceName) {
+      setSelectedService(defaultServiceName);
+    } else if (isMicroservices && projectServices.length > 0 && !selectedService) {
+      setSelectedService(projectServices[0]);
+    }
+  }, [defaultServiceName, isMicroservices, projectServices, selectedService]);
 
   // When selected project changes, auto-populate checklist from project template
   useEffect(() => {
@@ -52,8 +68,8 @@ export const CreateReleaseModal: React.FC<Props> = ({
       );
     } else {
       setChecklistItems([
-        { title: 'Run automated test suite', isRequired: true },
-        { title: 'Verify staging deployment', isRequired: true },
+        { title: 'Automated test suite passing', isRequired: true },
+        { title: 'Staging environment validation', isRequired: true },
       ]);
     }
   }, [selectedProjectId, projects]);
@@ -83,6 +99,7 @@ export const CreateReleaseModal: React.FC<Props> = ({
     createMutation.mutate(
       {
         projectId: selectedProjectId,
+        serviceName: isMicroservices ? selectedService || undefined : undefined,
         name: name.trim(),
         version: version.trim(),
         description: description.trim() || undefined,
@@ -99,6 +116,7 @@ export const CreateReleaseModal: React.FC<Props> = ({
           setVersion('');
           setDescription('');
           setTargetDate('');
+          setSelectedService('');
           onClose();
           if (onSuccess) onSuccess(newRelease.id);
         },
@@ -108,15 +126,16 @@ export const CreateReleaseModal: React.FC<Props> = ({
 
   const projectOptions = projects.map((p) => ({
     value: p.id,
-    label: `${p.name} [${p.key}]`,
+    label: `${p.name} [${p.key}]${p.nature === ProjectNature.MICROSERVICES ? ' (Microservices)' : ''}`,
   }));
+
+  const serviceOptions = [...projectServices.map((s) => ({ value: s, label: s }))];
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Create New Release"
-      description="Initialize release metadata and verification gates for your target project"
       footer={
         <>
           <Button variant="secondary" onClick={onClose} type="button">
@@ -158,24 +177,55 @@ export const CreateReleaseModal: React.FC<Props> = ({
         {/* Project Selector */}
         <Select
           label="Target Project"
+          innerLabel={true}
           required
           value={selectedProjectId}
-          onChange={(val) => setSelectedProjectId(String(val))}
+          onChange={(val) => {
+            setSelectedProjectId(String(val));
+            setSelectedService('');
+          }}
           options={projectOptions}
-          placeholder="Select target project..."
         />
+
+        {/* If Microservices project: Target Service dropdown */}
+        {isMicroservices && (
+          <div>
+            {serviceOptions.length > 0 ? (
+              <Select
+                label="Target Service"
+                innerLabel={true}
+                required
+                value={selectedService}
+                onChange={(val) => setSelectedService(String(val))}
+                options={serviceOptions}
+                placeholder="Select service..."
+              />
+            ) : (
+              <Input
+                label="Target Service Name"
+                innerLabel={true}
+                required
+                placeholder="e.g. auth-service"
+                value={selectedService}
+                onChange={(e) => setSelectedService(e.target.value)}
+              />
+            )}
+          </div>
+        )}
 
         <Input
           label="Release Name"
+          innerLabel={true}
           required
-          placeholder="e.g. Q4 2026 Core Platform Upgrade"
+          placeholder="e.g. Auth Token Rotation & Security Patch"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
           <Input
-            label="Semantic Version"
+            label="Version"
+            innerLabel={true}
             required
             helper="e.g. v1.2.0"
             placeholder="v1.0.0"
@@ -184,16 +234,18 @@ export const CreateReleaseModal: React.FC<Props> = ({
           />
 
           <DatePicker
-            label="Target Deployment Date"
+            label="Target Date"
+            innerLabel={true}
             value={targetDate}
             onChange={(date) => setTargetDate(date)}
           />
         </div>
 
         <Textarea
-          label="Description & Scope"
+          label="Description"
+          innerLabel={true}
           rows={2}
-          placeholder="Summary of features, deployment notes, or rollback procedures..."
+          placeholder="Summary of deployment notes..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
@@ -203,26 +255,18 @@ export const CreateReleaseModal: React.FC<Props> = ({
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.35rem',
+            gap: '0.4rem',
             marginTop: '0.25rem',
             borderTop: '1px solid var(--border-subtle)',
             paddingTop: '0.65rem',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <label
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.02em',
-              }}
-            >
-              Release Verification Checklist ({checklistItems.length})
-            </label>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              Auto-loaded from project template
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+              Checklist ({checklistItems.length})
+            </span>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+              Auto-loaded from template
             </span>
           </div>
 
@@ -230,8 +274,8 @@ export const CreateReleaseModal: React.FC<Props> = ({
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '0.35rem',
-              maxHeight: '160px',
+              gap: '0.3rem',
+              maxHeight: '130px',
               overflowY: 'auto',
               marginBottom: '0.35rem',
             }}
@@ -243,14 +287,14 @@ export const CreateReleaseModal: React.FC<Props> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '0.45rem 0.65rem',
+                  padding: '0.4rem 0.6rem',
                   backgroundColor: 'var(--bg-primary)',
                   border: '1px solid var(--border-color)',
                   borderRadius: 'var(--radius-sm)',
-                  fontSize: '0.825rem',
+                  fontSize: '0.8rem',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <span style={{ color: 'var(--accent-primary)', fontWeight: 700 }}>✓</span>
                   <span>{item.title}</span>
                   {item.isRequired && (
@@ -258,7 +302,7 @@ export const CreateReleaseModal: React.FC<Props> = ({
                       style={{
                         fontSize: '0.65rem',
                         fontWeight: 600,
-                        padding: '0.05rem 0.35rem',
+                        padding: '0.05rem 0.3rem',
                         backgroundColor: 'var(--accent-light)',
                         color: 'var(--accent-primary)',
                         borderRadius: '3px',
@@ -277,10 +321,8 @@ export const CreateReleaseModal: React.FC<Props> = ({
                     border: 'none',
                     color: 'var(--text-muted)',
                     cursor: 'pointer',
-                    fontSize: '0.85rem',
-                    padding: '0.1rem 0.3rem',
+                    fontSize: '0.8rem',
                   }}
-                  title="Remove step from release"
                 >
                   ✕
                 </button>
@@ -292,8 +334,9 @@ export const CreateReleaseModal: React.FC<Props> = ({
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
             <div style={{ flex: 1 }}>
               <Input
-                label="Add extra checklist step"
-                placeholder="e.g. Confirm load testing under 200ms latency"
+                label="Add extra verification item"
+                innerLabel={true}
+                placeholder="e.g. Verify rate limiter configuration"
                 value={newStepText}
                 onChange={(e) => setNewStepText(e.target.value)}
                 onKeyDown={(e) => {

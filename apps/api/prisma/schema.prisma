@@ -19,23 +19,26 @@ model HealthCheck {
 
 // Project Entity (Scoping releases and default checklists)
 model Project {
-  id               String    @id @default(uuid())
+  id               String        @id @default(uuid())
   name             String
-  key              String    @unique
+  key              String        @unique
   description      String?
-  defaultChecklist Json?     // Array of default checklist templates [{ title: string, description?: string, isRequired: boolean }]
+  nature           ProjectNature @default(MONOLITH)
+  services         Json?         // Array of service names string[] for microservices
+  defaultChecklist Json?         // Array of default checklist templates [{ title: string, description?: string, isRequired: boolean }]
   releases         Release[]
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
   @@map("projects")
 }
 
-// Core Release Entity scoped to Project
+// Core Release Entity scoped to Project & optional Service
 model Release {
   id          String        @id @default(uuid())
   projectId   String
   project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  serviceName String?       // Specific service for MICROSERVICES projects (null for MONOLITH)
   name        String
   version     String
   description String?
@@ -45,8 +48,9 @@ model Release {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  @@unique([projectId, version])
+  @@unique([projectId, serviceName, version])
   @@index([projectId])
+  @@index([projectId, serviceName])
   @@map("releases")
 }
 
@@ -65,6 +69,11 @@ model ReleaseStep {
 
   @@index([releaseId])
   @@map("release_steps")
+}
+
+enum ProjectNature {
+  MONOLITH
+  MICROSERVICES
 }
 
 enum ReleaseStatus {

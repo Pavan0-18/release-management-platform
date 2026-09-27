@@ -1,6 +1,7 @@
 import { Field, ID, InputType } from '@nestjs/graphql';
 import {
   IsArray,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -10,6 +11,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ProjectNature } from '@rmp/shared';
 import { DefaultChecklistItemInput } from './default-checklist-item.input';
 
 @InputType({ description: 'Input payload for modifying an existing project' })
@@ -41,6 +43,17 @@ export class UpdateProjectInput {
   @IsOptional()
   @MaxLength(500, { message: 'Description must not exceed 500 characters' })
   description?: string;
+
+  @Field(() => ProjectNature, { nullable: true })
+  @IsOptional()
+  @IsEnum(ProjectNature, { message: 'Nature must be either MONOLITH or MICROSERVICES' })
+  nature?: ProjectNature;
+
+  @Field(() => [String], { nullable: true, description: 'Microservices list under this project' })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  services?: string[];
 
   @Field(() => [DefaultChecklistItemInput], { nullable: true })
   @IsOptional()

@@ -12,6 +12,8 @@ describe('ProjectsService', () => {
     name: 'Core Platform',
     key: 'CORE',
     description: 'Core microservices and databases',
+    nature: 'MONOLITH',
+    services: [],
     defaultChecklist: [
       { title: 'Run unit tests', isRequired: true },
       { title: 'Verify migrations', isRequired: true },

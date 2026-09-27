@@ -34,6 +34,7 @@ export interface Release {
   id: string;
   projectId: string;
   project?: Project;
+  serviceName?: string | null;
   name: string;
   version: string;
   description?: string | null;
@@ -49,6 +50,7 @@ export interface Release {
 
 export interface CreateReleaseInput {
   projectId: string;
+  serviceName?: string;
   name: string;
   version: string;
   description?: string;
@@ -64,6 +66,7 @@ export interface CreateStepInlineInput {
 
 export interface UpdateReleaseInput {
   id: string;
+  serviceName?: string;
   name?: string;
   version?: string;
   description?: string;
