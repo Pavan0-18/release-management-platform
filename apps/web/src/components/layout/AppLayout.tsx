@@ -23,6 +23,17 @@ export const AppLayout: React.FC = () => {
           >
             Dashboard
           </Link>
+          <Link
+            to="/releases"
+            style={{
+              color: 'var(--text-primary)',
+              textDecoration: 'none',
+              fontSize: '0.9rem',
+              fontWeight: 500,
+            }}
+          >
+            Releases
+          </Link>
           <a
             href="https://github.com"
             target="_blank"

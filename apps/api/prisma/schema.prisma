@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Minimal model for system health check & initial connection verification
+// System health check & connection verification
 model HealthCheck {
   id        String   @id @default(uuid())
   status    String   @default("HEALTHY")
@@ -15,4 +15,54 @@ model HealthCheck {
   updatedAt DateTime @updatedAt
 
   @@map("health_checks")
+}
+
+// Phase 1: Core Release Entity
+model Release {
+  id          String        @id @default(uuid())
+  name        String
+  version     String
+  description String?
+  status      ReleaseStatus @default(DRAFT)
+  targetDate  DateTime?
+  steps       ReleaseStep[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("releases")
+}
+
+// Phase 1: Release Checklist Step
+model ReleaseStep {
+  id          String     @id @default(uuid())
+  releaseId   String
+  release     Release    @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  status      StepStatus @default(PENDING)
+  order       Int        @default(0)
+  isRequired  Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([releaseId])
+  @@map("release_steps")
+}
+
+enum ReleaseStatus {
+  DRAFT
+  PLANNED
+  IN_PROGRESS
+  READY_FOR_DEPLOYMENT
+  DEPLOYED
+  CANCELLED
+  FAILED
+}
+
+enum StepStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  BLOCKED
+  SKIPPED
 }
