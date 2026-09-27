@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import styles from './form.module.css';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string | boolean;
-  hint?: string;
+  helper?: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  innerLabel?: boolean;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -13,12 +15,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     {
       label,
       error,
-      hint,
+      helper,
       leftIcon,
       rightIcon,
       value,
       defaultValue,
-      placeholder,
+      placeholder = ' ',
       onFocus,
       onBlur,
       style,
@@ -26,146 +28,167 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       required,
       id,
       disabled,
+      type = 'text',
+      innerLabel = true,
       ...props
     },
     ref,
   ) => {
     const [isFocused, setIsFocused] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const fieldId = id || (label ? `input-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
+
     const hasValue = value !== undefined ? Boolean(value) : Boolean(defaultValue);
     const hasError = Boolean(error);
-    const inputId = id || (label ? `input-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
-
-    const isFloating = isFocused || hasValue || Boolean(placeholder) || props.type === 'date';
+    const isPassword = type === 'password';
+    const effectiveType = isPassword && showPassword ? 'text' : type;
 
     return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.25rem',
-          width: '100%',
-          ...style,
-        }}
-      >
-        <div
-          style={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            backgroundColor: disabled ? '#f5efe6' : '#ffffff',
-            border: `1.5px solid ${
-              hasError ? '#dc2626' : isFocused ? 'var(--accent-primary)' : 'var(--border-color)'
-            }`,
-            borderRadius: 'var(--radius-sm)',
-            boxShadow: isFocused ? '0 0 0 3px var(--accent-glow)' : 'var(--shadow-sm)',
-            transition: 'all 0.15s ease',
-            minHeight: label ? '48px' : '38px',
-          }}
-        >
-          {leftIcon && (
-            <span
-              style={{
-                position: 'absolute',
-                left: '0.75rem',
-                color: isFocused ? 'var(--accent-primary)' : 'var(--text-muted)',
-                display: 'flex',
-                alignItems: 'center',
-                pointerEvents: 'none',
-              }}
-            >
-              {leftIcon}
-            </span>
-          )}
-
-          {label && (
-            <label
-              htmlFor={inputId}
-              style={{
-                position: 'absolute',
-                left: leftIcon ? '2.25rem' : '0.75rem',
-                top: isFloating ? '0.35rem' : '50%',
-                transform: isFloating ? 'none' : 'translateY(-50%)',
-                fontSize: isFloating ? '0.7rem' : '0.85rem',
-                fontWeight: isFloating ? 600 : 400,
-                color: hasError
-                  ? '#dc2626'
-                  : isFocused
-                    ? 'var(--accent-primary)'
-                    : 'var(--text-muted)',
-                pointerEvents: 'none',
-                transition: 'all 0.15s ease',
-                lineHeight: 1,
-              }}
-            >
-              {label}
-              {required && <span style={{ color: '#dc2626', marginLeft: '0.15rem' }}>*</span>}
-            </label>
-          )}
-
-          <input
-            ref={ref}
-            id={inputId}
-            value={value}
-            defaultValue={defaultValue}
-            placeholder={isFocused || !label ? placeholder : ''}
-            disabled={disabled}
-            onFocus={(e) => {
-              setIsFocused(true);
-              if (onFocus) onFocus(e);
-            }}
-            onBlur={(e) => {
-              setIsFocused(false);
-              if (onBlur) onBlur(e);
-            }}
+      <div style={{ width: '100%', ...style }} className={className}>
+        {!innerLabel && label && (
+          <label
+            htmlFor={fieldId}
             style={{
-              width: '100%',
-              backgroundColor: 'transparent',
-              border: 'none',
-              outline: 'none',
-              fontSize: '0.875rem',
+              display: 'block',
+              marginBottom: '0.35rem',
+              fontSize: '0.85rem',
+              fontWeight: 500,
               color: 'var(--text-primary)',
-              paddingLeft: leftIcon ? '2.25rem' : '0.75rem',
-              paddingRight: rightIcon ? '2.25rem' : '0.75rem',
-              paddingTop: label ? '1.15rem' : '0.5rem',
-              paddingBottom: label ? '0.35rem' : '0.5rem',
-              fontFamily: 'inherit',
             }}
-            className={`input-component ${className}`}
-            {...props}
-          />
+          >
+            {label} {required && <span style={{ color: '#dc2626' }}>*</span>}
+          </label>
+        )}
 
-          {rightIcon && (
-            <span
-              style={{
-                position: 'absolute',
-                right: '0.75rem',
-                color: isFocused ? 'var(--accent-primary)' : 'var(--text-muted)',
-                display: 'flex',
-                alignItems: 'center',
+        <div
+          className={innerLabel ? styles.inputGroup : ''}
+          style={{ position: 'relative', width: '100%' }}
+        >
+          <div
+            style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}
+          >
+            {leftIcon && (
+              <span
+                style={{
+                  position: 'absolute',
+                  left: '0.75rem',
+                  color: isFocused ? 'var(--accent-primary)' : 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  pointerEvents: 'none',
+                  zIndex: 2,
+                }}
+              >
+                {leftIcon}
+              </span>
+            )}
+
+            <input
+              ref={ref}
+              id={fieldId}
+              type={effectiveType}
+              value={value}
+              defaultValue={defaultValue}
+              placeholder={
+                isFocused || hasValue || !innerLabel
+                  ? placeholder === ' '
+                    ? ''
+                    : placeholder
+                  : ' '
+              }
+              disabled={disabled}
+              required={required}
+              data-has-value={hasValue || isFocused ? 'true' : 'false'}
+              onFocus={(e) => {
+                setIsFocused(true);
+                if (onFocus) onFocus(e);
               }}
-            >
-              {rightIcon}
-            </span>
-          )}
+              onBlur={(e) => {
+                setIsFocused(false);
+                if (onBlur) onBlur(e);
+              }}
+              style={{
+                paddingLeft: leftIcon ? '2.25rem' : '0.85rem',
+                paddingRight: rightIcon || isPassword ? '2.5rem' : '0.85rem',
+                borderColor: hasError ? '#dc2626' : isFocused ? 'var(--border-focus)' : undefined,
+              }}
+              {...props}
+            />
+
+            {isPassword && !disabled && (
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '0.75rem',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  padding: '0.2rem',
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                title={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            )}
+
+            {rightIcon && !isPassword && (
+              <span
+                style={{
+                  position: 'absolute',
+                  right: '0.75rem',
+                  color: isFocused ? 'var(--accent-primary)' : 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                {rightIcon}
+              </span>
+            )}
+
+            {innerLabel && label && (
+              <label
+                htmlFor={fieldId}
+                className={`${styles.innerlabel} innerlabel`}
+                data-has-value={hasValue || isFocused ? 'true' : 'false'}
+              >
+                {label} {required && <span style={{ color: '#dc2626' }}>*</span>}
+              </label>
+            )}
+          </div>
         </div>
 
-        {hint && !hasError && (
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', paddingLeft: '0.25rem' }}>
-            {hint}
-          </span>
+        {helper && !hasError && (
+          <p
+            style={{
+              fontSize: '0.75rem',
+              color: 'var(--text-muted)',
+              marginTop: '0.25rem',
+              paddingLeft: '0.25rem',
+            }}
+          >
+            {helper}
+          </p>
         )}
 
         {typeof error === 'string' && (
-          <span
+          <p
             style={{
               fontSize: '0.75rem',
               color: '#dc2626',
               fontWeight: 500,
+              marginTop: '0.25rem',
               paddingLeft: '0.25rem',
             }}
           >
             {error}
-          </span>
+          </p>
         )}
       </div>
     );

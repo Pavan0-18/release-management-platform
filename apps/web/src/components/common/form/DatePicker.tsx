@@ -1,444 +1,291 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import styles from './form.module.css';
+import { MiniCalendar, toISO, parseISODate } from './MiniCalendar';
 
 export interface DatePickerProps {
   label?: string;
+  name?: string;
   value?: string; // Format: YYYY-MM-DD
   onChange?: (date: string) => void;
   error?: string | boolean;
-  hint?: string;
+  helper?: string;
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
   minDate?: string;
   maxDate?: string;
+  innerLabel?: boolean;
   style?: React.CSSProperties;
+  className?: string;
 }
 
 export const DatePicker: React.FC<DatePickerProps> = ({
   label,
+  name,
   value,
   onChange,
   error,
-  hint,
-  placeholder = 'Select date',
+  helper,
+  placeholder = 'DD/MM/YYYY',
   required,
   disabled,
+  minDate,
+  maxDate,
+  innerLabel = true,
   style,
+  className = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<React.CSSProperties>({});
+  const fieldId = name || `datepicker-${Math.random().toString(36).substr(2, 9)}`;
 
-  const initialDate = value ? new Date(value) : new Date();
-  const [viewDate, setViewDate] = useState<Date>(
-    isNaN(initialDate.getTime()) ? new Date() : initialDate,
-  );
-
-  const selectedDate = value ? new Date(value) : null;
-  const isSelectedValid = selectedDate && !isNaN(selectedDate.getTime());
-
-  const hasError = Boolean(error);
-  const isFloating = isOpen || Boolean(value);
-
-  // Close calendar popover on outside click
-  useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    if (isOpen) {
-      document.addEventListener('mousedown', handleOutsideClick);
+  // Convert ISO string YYYY-MM-DD -> display string DD/MM/YYYY
+  const formatToDisplay = useCallback((val: string | undefined): string => {
+    if (!val) return '';
+    const dateOnly = val.includes('T') ? val.slice(0, 10) : val;
+    const parts = dateOnly.split('-');
+    if (parts.length === 3 && parts[0].length === 4) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
+    return val;
+  }, []);
+
+  const [displayText, setDisplayText] = useState(() => formatToDisplay(value));
+
+  useEffect(() => {
+    setDisplayText(formatToDisplay(value));
+  }, [value, formatToDisplay]);
+
+  // Positioning logic for Portal dropdown (auto flip if not enough room below)
+  useEffect(() => {
+    const updatePosition = () => {
+      if (!isOpen || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      const dropdownHeight = 310;
+      const dropdownGap = 6;
+
+      const shouldOpenUpward = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+
+      let topPos: string | number = 'auto';
+      let bottomPos: string | number = 'auto';
+
+      if (shouldOpenUpward) {
+        bottomPos = `${viewportHeight - rect.top + dropdownGap}px`;
+      } else {
+        topPos = `${rect.bottom + dropdownGap}px`;
+      }
+
+      const leftPos = Math.max(8, Math.min(rect.left, window.innerWidth - 300));
+
+      setDropdownPosition({
+        position: 'fixed',
+        top: topPos,
+        bottom: bottomPos,
+        left: `${leftPos}px`,
+        width: '290px',
+        backgroundColor: '#ffffff',
+        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--radius-md)',
+        boxShadow: '0 10px 25px -5px rgba(74, 45, 20, 0.15), 0 8px 10px -6px rgba(74, 45, 20, 0.1)',
+        zIndex: 99999,
+      });
+    };
+
+    if (isOpen) {
+      updatePosition();
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+    }
+
     return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
     };
   }, [isOpen]);
 
-  const year = viewDate.getFullYear();
-  const month = viewDate.getMonth();
+  // Click outside listener
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target)
+      ) {
+        setIsOpen(false);
+      }
+    };
 
-  const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-
-  const daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDayIndex = new Date(year, month, 1).getDay();
-
-  const handlePrevMonth = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setViewDate(new Date(year, month - 1, 1));
-  };
-
-  const handleNextMonth = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setViewDate(new Date(year, month + 1, 1));
-  };
-
-  const handleSelectDay = (day: number) => {
-    const formattedMonth = String(month + 1).padStart(2, '0');
-    const formattedDay = String(day).padStart(2, '0');
-    const dateString = `${year}-${formattedMonth}-${formattedDay}`;
-    if (onChange) {
-      onChange(dateString);
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
     }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  // Handle typing formatted date DD/MM/YYYY
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/[^\d]/g, '').substring(0, 8);
+    let formatted = raw;
+    if (raw.length > 4) {
+      formatted = `${raw.slice(0, 2)}/${raw.slice(2, 4)}/${raw.slice(4)}`;
+    } else if (raw.length > 2) {
+      formatted = `${raw.slice(0, 2)}/${raw.slice(2)}`;
+    }
+    setDisplayText(formatted);
+
+    if (formatted.length === 10) {
+      const [d, m, y] = formatted.split('/');
+      const iso = `${y}-${m}-${d}`;
+      const parsed = parseISODate(iso);
+      if (!isNaN(parsed.getTime())) {
+        onChange?.(iso);
+      }
+    } else if (formatted.length === 0) {
+      onChange?.('');
+    }
+  };
+
+  const handleSelectDate = (isoDate: string) => {
+    onChange?.(isoDate);
+    setDisplayText(formatToDisplay(isoDate));
     setIsOpen(false);
   };
 
-  const handleSetToday = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const today = new Date();
-    const formattedMonth = String(today.getMonth() + 1).padStart(2, '0');
-    const formattedDay = String(today.getDate()).padStart(2, '0');
-    const dateString = `${today.getFullYear()}-${formattedMonth}-${formattedDay}`;
-    if (onChange) {
-      onChange(dateString);
-    }
-    setViewDate(today);
-    setIsOpen(false);
-  };
-
-  const handleClear = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onChange) {
-      onChange('');
-    }
-    setIsOpen(false);
-  };
-
-  const isToday = (day: number) => {
-    const today = new Date();
-    return today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
-  };
-
-  const isSelected = (day: number) => {
-    if (!isSelectedValid || !selectedDate) return false;
-    return (
-      selectedDate.getDate() === day &&
-      selectedDate.getMonth() === month &&
-      selectedDate.getFullYear() === year
-    );
-  };
-
-  const formattedDisplay =
-    isSelectedValid && selectedDate
-      ? selectedDate.toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
-      : '';
+  const hasValue = Boolean(displayText);
+  const hasError = Boolean(error);
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.25rem',
-        width: '100%',
-        ...style,
-      }}
-    >
-      {/* Input trigger container */}
+    <div style={{ width: '100%', ...style }} className={className}>
+      {!innerLabel && label && (
+        <label
+          htmlFor={fieldId}
+          style={{
+            display: 'block',
+            marginBottom: '0.35rem',
+            fontSize: '0.85rem',
+            fontWeight: 500,
+            color: 'var(--text-primary)',
+          }}
+        >
+          {label} {required && <span style={{ color: '#dc2626' }}>*</span>}
+        </label>
+      )}
+
       <div
-        onClick={() => {
-          if (!disabled) setIsOpen(!isOpen);
-        }}
-        tabIndex={disabled ? -1 : 0}
-        onFocus={() => {
-          if (!disabled) setIsOpen(true);
-        }}
-        style={{
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          backgroundColor: disabled ? '#f5efe6' : '#ffffff',
-          border: `1.5px solid ${
-            hasError ? '#dc2626' : isOpen ? 'var(--accent-primary)' : 'var(--border-color)'
-          }`,
-          borderRadius: 'var(--radius-sm)',
-          boxShadow: isOpen ? '0 0 0 3px var(--accent-glow)' : 'var(--shadow-sm)',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          minHeight: label ? '48px' : '38px',
-          paddingLeft: '0.75rem',
-          paddingRight: '2rem',
-          paddingTop: label ? '1.15rem' : '0.5rem',
-          paddingBottom: label ? '0.35rem' : '0.5rem',
-          transition: 'all 0.15s ease',
-          userSelect: 'none',
-        }}
+        ref={containerRef}
+        className={innerLabel ? styles.inputGroup : ''}
+        style={{ position: 'relative', width: '100%' }}
       >
-        {label && (
-          <label
+        <div style={{ position: 'relative', width: '100%' }}>
+          <input
+            id={fieldId}
+            name={name}
+            type="text"
+            data-has-value={hasValue || isOpen ? 'true' : 'false'}
+            value={displayText}
+            onChange={handleTextChange}
+            onFocus={() => {
+              if (!disabled) setIsOpen(true);
+            }}
+            placeholder={isOpen || hasValue ? placeholder : ' '}
+            maxLength={10}
+            inputMode="numeric"
+            autoComplete="off"
+            disabled={disabled}
+            required={required}
+            style={{
+              paddingRight: '2.5rem',
+              borderColor: hasError ? '#dc2626' : isOpen ? 'var(--border-focus)' : undefined,
+            }}
+          />
+
+          {/* Calendar trigger icon */}
+          <button
+            type="button"
+            tabIndex={-1}
+            disabled={disabled}
+            onClick={() => {
+              if (!disabled) setIsOpen((prev) => !prev);
+            }}
             style={{
               position: 'absolute',
-              left: '0.75rem',
-              top: isFloating ? '0.35rem' : '50%',
-              transform: isFloating ? 'none' : 'translateY(-50%)',
-              fontSize: isFloating ? '0.7rem' : '0.85rem',
-              fontWeight: isFloating ? 600 : 400,
-              color: hasError ? '#dc2626' : isOpen ? 'var(--accent-primary)' : 'var(--text-muted)',
-              pointerEvents: 'none',
-              transition: 'all 0.15s ease',
-              lineHeight: 1,
+              right: '0.75rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none',
+              border: 'none',
+              color: isOpen ? 'var(--accent-primary)' : 'var(--text-muted)',
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1rem',
+              padding: '0.2rem',
             }}
+            title="Open calendar"
           >
-            {label}
-            {required && <span style={{ color: '#dc2626', marginLeft: '0.15rem' }}>*</span>}
-          </label>
-        )}
+            📅
+          </button>
 
-        <span
-          style={{
-            fontSize: '0.875rem',
-            color: formattedDisplay ? 'var(--text-primary)' : 'var(--text-muted)',
-          }}
-        >
-          {formattedDisplay || (isOpen ? '' : placeholder)}
-        </span>
+          {innerLabel && label && (
+            <label
+              htmlFor={fieldId}
+              className={`${styles.innerlabel} innerlabel`}
+              data-has-value={hasValue || isOpen ? 'true' : 'false'}
+            >
+              {label} {required && <span style={{ color: '#dc2626' }}>*</span>}
+            </label>
+          )}
+        </div>
 
-        {/* Calendar icon */}
-        <span
-          style={{
-            position: 'absolute',
-            right: '0.75rem',
-            color: isOpen ? 'var(--accent-primary)' : 'var(--text-muted)',
-            display: 'flex',
-            alignItems: 'center',
-            fontSize: '0.9rem',
-          }}
-        >
-          📅
-        </span>
+        {/* Portal Calendar Popover */}
+        {isOpen &&
+          !disabled &&
+          createPortal(
+            <div ref={dropdownRef} style={dropdownPosition}>
+              <MiniCalendar
+                value={value}
+                onSelect={handleSelectDate}
+                minDate={minDate}
+                maxDate={maxDate}
+              />
+            </div>,
+            document.body,
+          )}
       </div>
 
-      {hint && !hasError && (
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', paddingLeft: '0.25rem' }}>
-          {hint}
-        </span>
+      {helper && !hasError && (
+        <p
+          style={{
+            fontSize: '0.75rem',
+            color: 'var(--text-muted)',
+            marginTop: '0.25rem',
+            paddingLeft: '0.25rem',
+          }}
+        >
+          {helper}
+        </p>
       )}
 
       {typeof error === 'string' && (
-        <span
-          style={{ fontSize: '0.75rem', color: '#dc2626', fontWeight: 500, paddingLeft: '0.25rem' }}
-        >
-          {error}
-        </span>
-      )}
-
-      {/* Calendar popover */}
-      {isOpen && (
-        <div
+        <p
           style={{
-            position: 'absolute',
-            top: 'calc(100% + 4px)',
-            left: 0,
-            zIndex: 1100,
-            width: '280px',
-            backgroundColor: '#ffffff',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-md)',
-            boxShadow:
-              '0 10px 25px -5px rgba(74, 45, 20, 0.15), 0 8px 10px -6px rgba(74, 45, 20, 0.1)',
-            padding: '0.85rem',
+            fontSize: '0.75rem',
+            color: '#dc2626',
+            fontWeight: 500,
+            marginTop: '0.25rem',
+            paddingLeft: '0.25rem',
           }}
         >
-          {/* Header Month / Year & Prev/Next */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '0.75rem',
-            }}
-          >
-            <button
-              type="button"
-              onClick={handlePrevMonth}
-              style={{
-                background: 'none',
-                border: '1px solid var(--border-color)',
-                borderRadius: '4px',
-                padding: '0.2rem 0.5rem',
-                color: 'var(--accent-primary)',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              &larr;
-            </button>
-
-            <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
-              {monthNames[month]} {year}
-            </span>
-
-            <button
-              type="button"
-              onClick={handleNextMonth}
-              style={{
-                background: 'none',
-                border: '1px solid var(--border-color)',
-                borderRadius: '4px',
-                padding: '0.2rem 0.5rem',
-                color: 'var(--accent-primary)',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              &rarr;
-            </button>
-          </div>
-
-          {/* Days of week */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: '2px',
-              textAlign: 'center',
-              marginBottom: '4px',
-            }}
-          >
-            {daysOfWeek.map((day) => (
-              <span
-                key={day}
-                style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  color: 'var(--text-muted)',
-                  padding: '2px 0',
-                }}
-              >
-                {day}
-              </span>
-            ))}
-          </div>
-
-          {/* Days Grid */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: '2px',
-            }}
-          >
-            {/* Empty slots before day 1 */}
-            {Array.from({ length: firstDayIndex }).map((_, i) => (
-              <div key={`empty-${i}`} style={{ height: '30px' }} />
-            ))}
-
-            {/* Month days */}
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const dayNum = i + 1;
-              const selected = isSelected(dayNum);
-              const today = isToday(dayNum);
-
-              return (
-                <button
-                  key={`day-${dayNum}`}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectDay(dayNum);
-                  }}
-                  style={{
-                    height: '30px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '0.8rem',
-                    fontWeight: selected || today ? 600 : 400,
-                    backgroundColor: selected
-                      ? 'var(--accent-primary)'
-                      : today
-                        ? 'var(--accent-light)'
-                        : 'transparent',
-                    color: selected
-                      ? '#ffffff'
-                      : today
-                        ? 'var(--accent-primary)'
-                        : 'var(--text-primary)',
-                    border: today && !selected ? '1px solid var(--accent-primary)' : 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    transition: 'all 0.1s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!selected) e.currentTarget.style.backgroundColor = 'var(--accent-light)';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!selected) {
-                      e.currentTarget.style.backgroundColor = today
-                        ? 'var(--accent-light)'
-                        : 'transparent';
-                    }
-                  }}
-                >
-                  {dayNum}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Quick Footer Controls */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginTop: '0.65rem',
-              paddingTop: '0.5rem',
-              borderTop: '1px solid var(--border-subtle)',
-            }}
-          >
-            <button
-              type="button"
-              onClick={handleSetToday}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--accent-primary)',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                padding: '2px 4px',
-              }}
-            >
-              Today
-            </button>
-
-            {value && (
-              <button
-                type="button"
-                onClick={handleClear}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--text-muted)',
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  padding: '2px 4px',
-                }}
-              >
-                Clear
-              </button>
-            )}
-          </div>
-        </div>
+          {error}
+        </p>
       )}
     </div>
   );

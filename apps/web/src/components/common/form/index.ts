@@ -4,5 +4,6 @@ export * from './Input';
 export * from './Textarea';
 export * from './Select';
 export * from './DatePicker';
+export * from './MiniCalendar';
 export * from './Checkbox';
 export * from './Modal';

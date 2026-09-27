@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { useQuery } from '@apollo/client';
 import { Link } from 'react-router-dom';
 import { Release, ReleaseStatus } from '@rmp/shared';
-import { GET_RELEASES } from '../graphql/releases.queries';
+import { useReleases } from '../hooks/useReleases';
 import { ReleaseStatusBadge } from '../components/releases/ReleaseStatusBadge';
 import { ProgressBar } from '../components/releases/ProgressBar';
 import { CreateReleaseModal } from '../components/releases/CreateReleaseModal';
@@ -14,17 +13,16 @@ export const ReleasesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  const { data, loading, error, refetch } = useQuery(GET_RELEASES, {
-    variables: {
-      filter: {
-        status: statusFilter ? (statusFilter as ReleaseStatus) : undefined,
-        search: searchTerm.trim() || undefined,
-      },
-    },
-    fetchPolicy: 'cache-and-network',
+  const {
+    data: releases = [],
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useReleases({
+    status: statusFilter ? (statusFilter as ReleaseStatus) : undefined,
+    search: searchTerm.trim() || undefined,
   });
-
-  const releases: Release[] = data?.releases || [];
 
   const totalCount = releases.length;
   const inProgressCount = releases.filter((r) => r.status === ReleaseStatus.IN_PROGRESS).length;
@@ -148,6 +146,7 @@ export const ReleasesPage: React.FC = () => {
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ flex: 1, minWidth: '220px' }}>
             <Input
+              label="Search Releases"
               placeholder="Search releases by name or version..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -157,8 +156,9 @@ export const ReleasesPage: React.FC = () => {
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <div style={{ minWidth: '180px' }}>
               <Select
+                label="Status Filter"
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(val) => setStatusFilter(String(val))}
                 options={[
                   { value: '', label: 'All Statuses' },
                   { value: ReleaseStatus.DRAFT, label: 'Draft' },
@@ -172,7 +172,13 @@ export const ReleasesPage: React.FC = () => {
               />
             </div>
 
-            <Button variant="secondary" onClick={() => refetch()} title="Refresh">
+            <Button
+              variant="secondary"
+              onClick={() => refetch()}
+              title="Refresh"
+              loading={isFetching && !isLoading}
+              style={{ height: '44px' }}
+            >
               Refresh
             </Button>
           </div>
@@ -180,12 +186,12 @@ export const ReleasesPage: React.FC = () => {
       </div>
 
       {/* Releases List */}
-      {loading && !data ? (
+      {isLoading ? (
         <LoadingSpinner message="Loading releases..." />
       ) : error ? (
         <div className="card" style={{ borderLeft: '4px solid var(--status-error-border)' }}>
           <p style={{ color: 'var(--status-error-text)' }}>
-            Failed to load releases: {error.message}
+            Failed to load releases: {(error as Error).message}
           </p>
         </div>
       ) : releases.length === 0 ? (
@@ -221,7 +227,7 @@ export const ReleasesPage: React.FC = () => {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {releases.map((release) => (
+          {releases.map((release: Release) => (
             <Link
               key={release.id}
               to={`/releases/${release.id}`}

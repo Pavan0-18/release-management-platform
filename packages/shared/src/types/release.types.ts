@@ -58,6 +58,7 @@ export interface CreateStepInlineInput {
 }
 
 export interface UpdateReleaseInput {
+  id: string;
   name?: string;
   version?: string;
   description?: string;
@@ -74,6 +75,7 @@ export interface CreateReleaseStepInput {
 }
 
 export interface UpdateReleaseStepInput {
+  id: string;
   title?: string;
   description?: string;
   status?: StepStatus;

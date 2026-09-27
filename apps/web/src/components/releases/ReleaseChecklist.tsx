@@ -1,11 +1,6 @@
 import React from 'react';
-import { useMutation } from '@apollo/client';
 import { ReleaseStep, StepStatus } from '@rmp/shared';
-import {
-  DELETE_RELEASE_STEP,
-  GET_RELEASE,
-  UPDATE_RELEASE_STEP,
-} from '../../graphql/releases.queries';
+import { useUpdateReleaseStep, useDeleteReleaseStep } from '../../hooks/useReleases';
 import { Select } from '../common/form';
 
 interface Props {
@@ -14,22 +9,13 @@ interface Props {
 }
 
 export const ReleaseChecklist: React.FC<Props> = ({ releaseId, steps }) => {
-  const [updateStep] = useMutation(UPDATE_RELEASE_STEP, {
-    refetchQueries: [{ query: GET_RELEASE, variables: { id: releaseId } }],
-  });
-
-  const [deleteStep] = useMutation(DELETE_RELEASE_STEP, {
-    refetchQueries: [{ query: GET_RELEASE, variables: { id: releaseId } }],
-  });
+  const updateStepMutation = useUpdateReleaseStep(releaseId);
+  const deleteStepMutation = useDeleteReleaseStep(releaseId);
 
   const handleStatusChange = (stepId: string, newStatus: StepStatus) => {
-    updateStep({
-      variables: {
-        input: {
-          id: stepId,
-          status: newStatus,
-        },
-      },
+    updateStepMutation.mutate({
+      id: stepId,
+      status: newStatus,
     });
   };
 
@@ -41,9 +27,7 @@ export const ReleaseChecklist: React.FC<Props> = ({ releaseId, steps }) => {
 
   const handleDelete = (stepId: string) => {
     if (window.confirm('Are you sure you want to remove this verification step?')) {
-      deleteStep({
-        variables: { id: stepId },
-      });
+      deleteStepMutation.mutate(stepId);
     }
   };
 
@@ -152,11 +136,10 @@ export const ReleaseChecklist: React.FC<Props> = ({ releaseId, steps }) => {
 
             {/* Status Selector & Actions */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: '130px' }}>
+              <div style={{ width: '140px' }}>
                 <Select
                   value={step.status}
-                  onChange={(e) => handleStatusChange(step.id, e.target.value as StepStatus)}
-                  style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                  onChange={(val) => handleStatusChange(step.id, val as StepStatus)}
                   options={[
                     { value: StepStatus.PENDING, label: 'Pending' },
                     { value: StepStatus.IN_PROGRESS, label: 'In Progress' },

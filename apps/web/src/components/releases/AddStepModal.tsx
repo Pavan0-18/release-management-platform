@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { ADD_RELEASE_STEP, GET_RELEASE } from '../../graphql/releases.queries';
+import { useAddReleaseStep } from '../../hooks/useReleases';
 import { Modal, Input, Textarea, Checkbox, Button } from '../common/form';
 
 interface Props {
@@ -15,31 +14,29 @@ export const AddStepModal: React.FC<Props> = ({ isOpen, releaseId, onClose, onSu
   const [description, setDescription] = useState('');
   const [isRequired, setIsRequired] = useState(true);
 
-  const [addStep, { loading, error }] = useMutation(ADD_RELEASE_STEP, {
-    refetchQueries: [{ query: GET_RELEASE, variables: { id: releaseId } }],
-    onCompleted: () => {
-      setTitle('');
-      setDescription('');
-      setIsRequired(true);
-      onClose();
-      if (onSuccess) onSuccess();
-    },
-  });
+  const addMutation = useAddReleaseStep(releaseId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
 
-    addStep({
-      variables: {
-        input: {
-          releaseId,
-          title: title.trim(),
-          description: description.trim() || undefined,
-          isRequired,
+    addMutation.mutate(
+      {
+        releaseId,
+        title: title.trim(),
+        description: description.trim() || undefined,
+        isRequired,
+      },
+      {
+        onSuccess: () => {
+          setTitle('');
+          setDescription('');
+          setIsRequired(true);
+          onClose();
+          if (onSuccess) onSuccess();
         },
       },
-    });
+    );
   };
 
   return (
@@ -56,15 +53,15 @@ export const AddStepModal: React.FC<Props> = ({ isOpen, releaseId, onClose, onSu
           <Button
             variant="primary"
             onClick={handleSubmit}
-            loading={loading}
-            disabled={loading || !title.trim()}
+            loading={addMutation.isPending}
+            disabled={addMutation.isPending || !title.trim()}
           >
             Add Step
           </Button>
         </>
       }
     >
-      {error && (
+      {addMutation.error && (
         <div
           style={{
             padding: '0.65rem 0.85rem',
@@ -76,7 +73,7 @@ export const AddStepModal: React.FC<Props> = ({ isOpen, releaseId, onClose, onSu
             fontSize: '0.85rem',
           }}
         >
-          {error.message}
+          {addMutation.error.message}
         </div>
       )}
 

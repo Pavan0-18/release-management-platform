@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useQuery, useMutation } from '@apollo/client';
 import { Release, ReleaseStatus } from '@rmp/shared';
-import {
-  DELETE_RELEASE,
-  GET_RELEASE,
-  GET_RELEASES,
-  UPDATE_RELEASE,
-} from '../graphql/releases.queries';
+import { useRelease, useUpdateRelease, useDeleteRelease } from '../hooks/useReleases';
 import { ReleaseStatusBadge } from '../components/releases/ReleaseStatusBadge';
 import { ProgressBar } from '../components/releases/ProgressBar';
 import { ReleaseChecklist } from '../components/releases/ReleaseChecklist';
@@ -20,45 +14,30 @@ export const ReleaseDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const [isAddStepOpen, setIsAddStepOpen] = useState(false);
 
-  const { data, loading, error, refetch } = useQuery(GET_RELEASE, {
-    variables: { id: id! },
-    skip: !id,
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const [updateRelease, { loading: updating }] = useMutation(UPDATE_RELEASE, {
-    refetchQueries: [{ query: GET_RELEASE, variables: { id } }, { query: GET_RELEASES }],
-  });
-
-  const [deleteRelease, { loading: deleting }] = useMutation(DELETE_RELEASE, {
-    refetchQueries: [{ query: GET_RELEASES }],
-    onCompleted: () => {
-      navigate('/releases');
-    },
-  });
-
-  const release: Release | undefined = data?.release;
+  const { data: release, isLoading, error, refetch } = useRelease(id);
+  const updateMutation = useUpdateRelease(id);
+  const deleteMutation = useDeleteRelease();
 
   const handleStatusChange = (newStatus: ReleaseStatus) => {
     if (!id) return;
-    updateRelease({
-      variables: {
-        input: {
-          id,
-          status: newStatus,
-        },
-      },
+    updateMutation.mutate({
+      id,
+      status: newStatus,
     });
   };
 
   const handleDeleteRelease = () => {
     if (!id) return;
     if (window.confirm(`Are you sure you want to delete release "${release?.name}"?`)) {
-      deleteRelease({ variables: { id } });
+      deleteMutation.mutate(id, {
+        onSuccess: () => {
+          navigate('/releases');
+        },
+      });
     }
   };
 
-  if (loading && !data) {
+  if (isLoading) {
     return <LoadingSpinner message="Loading release details..." />;
   }
 
@@ -69,7 +48,7 @@ export const ReleaseDetailPage: React.FC = () => {
           Release Not Found
         </h3>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
-          {error?.message || 'Could not locate the requested release record.'}
+          {(error as Error)?.message || 'Could not locate the requested release record.'}
         </p>
         <Link to="/releases" className="btn btn-secondary">
           &larr; Back to Releases
@@ -97,7 +76,12 @@ export const ReleaseDetailPage: React.FC = () => {
           &larr; Back to Releases
         </Link>
 
-        <Button variant="danger" size="sm" onClick={handleDeleteRelease} loading={deleting}>
+        <Button
+          variant="danger"
+          size="sm"
+          onClick={handleDeleteRelease}
+          loading={deleteMutation.isPending}
+        >
           Delete Release
         </Button>
       </div>
@@ -161,12 +145,12 @@ export const ReleaseDetailPage: React.FC = () => {
               <ReleaseStatusBadge status={release.status} />
             </div>
 
-            <div style={{ width: '180px' }}>
+            <div style={{ width: '190px' }}>
               <Select
+                label="Change Status"
                 value={release.status}
-                disabled={updating}
-                onChange={(e) => handleStatusChange(e.target.value as ReleaseStatus)}
-                style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem' }}
+                disabled={updateMutation.isPending}
+                onChange={(val) => handleStatusChange(val as ReleaseStatus)}
                 options={[
                   { value: ReleaseStatus.DRAFT, label: 'Draft' },
                   { value: ReleaseStatus.PLANNED, label: 'Planned' },

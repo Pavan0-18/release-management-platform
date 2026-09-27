@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { CREATE_RELEASE, GET_RELEASES } from '../../graphql/releases.queries';
+import { useCreateRelease } from '../../hooks/useReleases';
 import { Modal, Input, Textarea, DatePicker, Button } from '../common/form';
 
 interface Props {
@@ -21,17 +20,7 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
   ]);
   const [newStepText, setNewStepText] = useState('');
 
-  const [createRelease, { loading, error }] = useMutation(CREATE_RELEASE, {
-    refetchQueries: [{ query: GET_RELEASES }],
-    onCompleted: () => {
-      setName('');
-      setVersion('');
-      setDescription('');
-      setTargetDate('');
-      onClose();
-      if (onSuccess) onSuccess();
-    },
-  });
+  const createMutation = useCreateRelease();
 
   const handleAddInlineStep = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,20 +38,28 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
     e.preventDefault();
     if (!name.trim() || !version.trim()) return;
 
-    createRelease({
-      variables: {
-        input: {
-          name: name.trim(),
-          version: version.trim(),
-          description: description.trim() || undefined,
-          targetDate: targetDate ? new Date(targetDate).toISOString() : undefined,
-          steps: checklistItems.map((title) => ({
-            title,
-            isRequired: true,
-          })),
+    createMutation.mutate(
+      {
+        name: name.trim(),
+        version: version.trim(),
+        description: description.trim() || undefined,
+        targetDate: targetDate ? new Date(targetDate).toISOString() : undefined,
+        steps: checklistItems.map((title) => ({
+          title,
+          isRequired: true,
+        })),
+      },
+      {
+        onSuccess: () => {
+          setName('');
+          setVersion('');
+          setDescription('');
+          setTargetDate('');
+          onClose();
+          if (onSuccess) onSuccess();
         },
       },
-    });
+    );
   };
 
   return (
@@ -79,15 +76,15 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
           <Button
             variant="primary"
             onClick={handleSubmit}
-            loading={loading}
-            disabled={loading || !name.trim() || !version.trim()}
+            loading={createMutation.isPending}
+            disabled={createMutation.isPending || !name.trim() || !version.trim()}
           >
             Create Release
           </Button>
         </>
       }
     >
-      {error && (
+      {createMutation.error && (
         <div
           style={{
             padding: '0.65rem 0.85rem',
@@ -99,7 +96,7 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
             fontSize: '0.85rem',
           }}
         >
-          {error.message}
+          {createMutation.error.message}
         </div>
       )}
 
@@ -119,7 +116,7 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
           <Input
             label="Semantic Version"
             required
-            hint="e.g. v1.2.0"
+            helper="e.g. v1.2.0"
             placeholder="v1.0.0"
             value={version}
             onChange={(e) => setVersion(e.target.value)}
@@ -197,24 +194,26 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
             ))}
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Input
-              label="Add step"
-              placeholder="e.g. Run database migrations"
-              value={newStepText}
-              onChange={(e) => setNewStepText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleAddInlineStep(e);
-                }
-              }}
-            />
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1 }}>
+              <Input
+                label="Add step"
+                placeholder="e.g. Run database migrations"
+                value={newStepText}
+                onChange={(e) => setNewStepText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddInlineStep(e);
+                  }
+                }}
+              />
+            </div>
             <Button
               type="button"
               variant="secondary"
               onClick={handleAddInlineStep}
-              style={{ alignSelf: 'center', height: '48px' }}
+              style={{ height: '44px' }}
             >
               Add
             </Button>

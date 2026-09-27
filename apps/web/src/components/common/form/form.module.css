@@ -1,0 +1,195 @@
+.inputGroup {
+  font-family: inherit;
+  position: relative;
+  width: 100%;
+}
+
+.inputGroup input,
+.inputGroup textarea {
+  font-size: 0.875rem;
+  outline: none;
+  background-color: transparent;
+  width: 100%;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 0.75rem 0.85rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.inputGroup input {
+  height: 44px;
+}
+
+.inputGroup textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.inputGroup label.innerlabel {
+  top: 50%;
+  transform: translateY(-50%);
+  position: absolute;
+  left: 10px;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  background-color: transparent;
+  padding: 0 4px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.inputGroup:has(textarea) label.innerlabel {
+  top: 1.1rem;
+}
+
+.inputGroup :is(input:focus, input[data-has-value="true"]) ~ label.innerlabel,
+.inputGroup :is(textarea:focus, textarea[data-has-value="true"]) ~ label.innerlabel,
+.inputGroup :is(div[data-has-value="true"]) ~ label.innerlabel,
+.inputGroup label.innerlabel[data-has-value="true"],
+.inputGroup:focus-within label.innerlabel {
+  top: 0;
+  left: 8px;
+  transform: translateY(-50%);
+  font-size: 11.5px;
+  font-weight: 600;
+  z-index: 10;
+  background-color: #ffffff;
+  color: var(--accent-primary);
+}
+
+.inputGroup input:focus,
+.inputGroup textarea:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.inputGroup input:disabled,
+.inputGroup textarea:disabled {
+  background-color: #f7f3ee;
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* ============================================================================
+   CUSTOM SELECT STYLES (MATCHING REFERENCE)
+============================================================================ */
+
+.customSelectWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.customSelectDisplay {
+  width: 100%;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background-color: #ffffff;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2.25rem 0 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  user-select: none;
+  position: relative;
+}
+
+.customSelectDisplay:hover {
+  border-color: var(--text-secondary);
+}
+
+.customSelectDisplay.open,
+.customSelectWrapper:focus-within .customSelectDisplay {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.customSelectDisplayText {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.customSelectArrow {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--text-muted);
+  transition: transform 0.25s ease;
+  font-size: 0.8rem;
+}
+
+.customSelectArrow.open {
+  transform: translateY(-50%) rotate(180deg);
+  color: var(--accent-primary);
+}
+
+.customSelectDropdown {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 25px -5px rgba(74, 45, 20, 0.15), 0 8px 10px -6px rgba(74, 45, 20, 0.1);
+  overflow-y: auto;
+  max-height: 250px;
+  z-index: 99999;
+  padding: 0.35rem;
+}
+
+.customSelectSearchContainer {
+  padding: 0.35rem;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 0.25rem;
+}
+
+.customSelectSearchInput {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  outline: none;
+}
+
+.customSelectSearchInput:focus {
+  border-color: var(--border-focus);
+}
+
+.customSelectOption {
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.customSelectOption:hover {
+  background-color: var(--accent-light);
+  color: var(--accent-primary);
+}
+
+.customSelectOption.selected {
+  background-color: var(--accent-light);
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.customSelectNoOptions {
+  padding: 0.75rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
