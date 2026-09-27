@@ -1,50 +1,29 @@
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, NavLink, Link } from 'react-router-dom';
 
 export const AppLayout: React.FC = () => {
   return (
     <div className="app-container">
       <header className="header">
-        <div className="logo-group">
-          <div className="logo-badge">RM</div>
-          <div>
-            <h1 className="logo-title">Release Management Platform</h1>
+        <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <div className="logo-group">
+            <div className="logo-badge">RM</div>
+            <div>
+              <h1 className="logo-title">Release Management Platform</h1>
+            </div>
           </div>
-        </div>
-        <nav style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <Link
-            to="/"
-            style={{
-              color: 'var(--text-primary)',
-              textDecoration: 'none',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-            }}
-          >
-            Dashboard
-          </Link>
-          <Link
-            to="/releases"
-            style={{
-              color: 'var(--text-primary)',
-              textDecoration: 'none',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-            }}
-          >
+        </Link>
+        <nav style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             Releases
-          </Link>
+          </NavLink>
           <a
-            href="https://github.com"
+            href="http://localhost:3000/graphql"
             target="_blank"
             rel="noreferrer"
-            style={{
-              color: 'var(--text-secondary)',
-              textDecoration: 'none',
-              fontSize: '0.9rem',
-            }}
+            className="nav-link"
           >
-            Docs
+            GraphQL API
           </a>
         </nav>
       </header>
@@ -54,7 +33,10 @@ export const AppLayout: React.FC = () => {
       </main>
 
       <footer className="footer">
-        <p>Release Management Platform &copy; {new Date().getFullYear()} &bull; Foundation Setup</p>
+        <p>
+          Release Management Platform &copy; {new Date().getFullYear()} &bull; Production Release
+          Governance
+        </p>
       </footer>
     </div>
   );

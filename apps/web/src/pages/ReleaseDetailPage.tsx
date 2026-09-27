@@ -13,6 +13,7 @@ import { ProgressBar } from '../components/releases/ProgressBar';
 import { ReleaseChecklist } from '../components/releases/ReleaseChecklist';
 import { AddStepModal } from '../components/releases/AddStepModal';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { Button, Select } from '../components/common/form';
 
 export const ReleaseDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,7 +59,7 @@ export const ReleaseDetailPage: React.FC = () => {
   };
 
   if (loading && !data) {
-    return <LoadingSpinner message="Loading release checklist..." />;
+    return <LoadingSpinner message="Loading release details..." />;
   }
 
   if (error || !release) {
@@ -96,19 +97,9 @@ export const ReleaseDetailPage: React.FC = () => {
           &larr; Back to Releases
         </Link>
 
-        <button
-          onClick={handleDeleteRelease}
-          disabled={deleting}
-          className="btn btn-secondary"
-          style={{
-            color: '#dc2626',
-            borderColor: '#fecaca',
-            fontSize: '0.8rem',
-            padding: '0.35rem 0.75rem',
-          }}
-        >
-          {deleting ? 'Deleting...' : 'Delete Release'}
-        </button>
+        <Button variant="danger" size="sm" onClick={handleDeleteRelease} loading={deleting}>
+          Delete Release
+        </Button>
       </div>
 
       {/* Release Overview Header */}
@@ -137,13 +128,13 @@ export const ReleaseDetailPage: React.FC = () => {
               </h2>
               <code
                 style={{
-                  backgroundColor: '#eff6ff',
+                  backgroundColor: 'var(--accent-light)',
                   padding: '0.2rem 0.5rem',
                   borderRadius: '4px',
                   fontSize: '0.85rem',
                   color: 'var(--accent-primary)',
                   fontWeight: 600,
-                  border: '1px solid #bfdbfe',
+                  border: '1px solid #ebdcd0',
                 }}
               >
                 {release.version}
@@ -170,23 +161,23 @@ export const ReleaseDetailPage: React.FC = () => {
               <ReleaseStatusBadge status={release.status} />
             </div>
 
-            <select
-              value={release.status}
-              disabled={updating}
-              onChange={(e) => handleStatusChange(e.target.value as ReleaseStatus)}
-              style={{
-                padding: '0.35rem 0.65rem',
-                fontSize: '0.8rem',
-              }}
-            >
-              <option value={ReleaseStatus.DRAFT}>Draft</option>
-              <option value={ReleaseStatus.PLANNED}>Planned</option>
-              <option value={ReleaseStatus.IN_PROGRESS}>In Progress</option>
-              <option value={ReleaseStatus.READY_FOR_DEPLOYMENT}>Ready for Deployment</option>
-              <option value={ReleaseStatus.DEPLOYED}>Deployed</option>
-              <option value={ReleaseStatus.FAILED}>Failed</option>
-              <option value={ReleaseStatus.CANCELLED}>Cancelled</option>
-            </select>
+            <div style={{ width: '180px' }}>
+              <Select
+                value={release.status}
+                disabled={updating}
+                onChange={(e) => handleStatusChange(e.target.value as ReleaseStatus)}
+                style={{ padding: '0.35rem 0.65rem', fontSize: '0.8rem' }}
+                options={[
+                  { value: ReleaseStatus.DRAFT, label: 'Draft' },
+                  { value: ReleaseStatus.PLANNED, label: 'Planned' },
+                  { value: ReleaseStatus.IN_PROGRESS, label: 'In Progress' },
+                  { value: ReleaseStatus.READY_FOR_DEPLOYMENT, label: 'Ready for Deployment' },
+                  { value: ReleaseStatus.DEPLOYED, label: 'Deployed' },
+                  { value: ReleaseStatus.FAILED, label: 'Failed' },
+                  { value: ReleaseStatus.CANCELLED, label: 'Cancelled' },
+                ]}
+              />
+            </div>
           </div>
         </div>
 
@@ -256,17 +247,13 @@ export const ReleaseDetailPage: React.FC = () => {
               Checklist Steps
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.15rem' }}>
-              Verification gates required before promotion
+              Verification gates required before release promotion
             </p>
           </div>
 
-          <button
-            onClick={() => setIsAddStepOpen(true)}
-            className="btn btn-primary"
-            style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
-          >
+          <Button variant="primary" size="sm" onClick={() => setIsAddStepOpen(true)}>
             + Add Step
-          </button>
+          </Button>
         </div>
 
         <ReleaseChecklist releaseId={release.id} steps={release.steps} />

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { CREATE_RELEASE, GET_RELEASES } from '../../graphql/releases.queries';
+import { Modal, Input, Textarea, DatePicker, Button } from '../common/form';
 
 interface Props {
   isOpen: boolean;
@@ -31,8 +32,6 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
       if (onSuccess) onSuccess();
     },
   });
-
-  if (!isOpen) return null;
 
   const handleAddInlineStep = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,285 +66,161 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.4)',
-        backdropFilter: 'blur(2px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: '1rem',
-      }}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Create New Release"
+      description="Initialize release metadata and default checklist gates"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} type="button">
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            loading={loading}
+            disabled={loading || !name.trim() || !version.trim()}
+          >
+            Create Release
+          </Button>
+        </>
+      }
     >
-      <div
-        className="card"
-        style={{
-          maxWidth: '520px',
-          width: '100%',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          backgroundColor: '#ffffff',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-        }}
-      >
+      {error && (
         <div
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            padding: '0.65rem 0.85rem',
+            backgroundColor: 'var(--status-error-bg)',
+            color: 'var(--status-error-text)',
+            border: '1px solid var(--status-error-border)',
+            borderRadius: 'var(--radius-sm)',
             marginBottom: '1rem',
-            borderBottom: '1px solid var(--border-color)',
-            paddingBottom: '0.75rem',
+            fontSize: '0.85rem',
           }}
         >
-          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-            Create New Release
-          </h3>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
-              fontSize: '1.25rem',
-              cursor: 'pointer',
-            }}
-          >
-            ✕
-          </button>
+          {error.message}
+        </div>
+      )}
+
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}
+      >
+        <Input
+          label="Release Name"
+          required
+          placeholder="e.g. October 2026 Core Platform Upgrade"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <Input
+            label="Semantic Version"
+            required
+            hint="e.g. v1.2.0"
+            placeholder="v1.0.0"
+            value={version}
+            onChange={(e) => setVersion(e.target.value)}
+          />
+
+          <DatePicker
+            label="Target Deployment Date"
+            value={targetDate}
+            onChange={(date) => setTargetDate(date)}
+          />
         </div>
 
-        {error && (
-          <div
+        <Textarea
+          label="Description & Scope"
+          rows={2}
+          placeholder="Summary of changes, key components, or deployment criteria..."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+
+        {/* Initial Checklist Items */}
+        <div
+          style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginTop: '0.25rem' }}
+        >
+          <label
             style={{
-              padding: '0.65rem 0.85rem',
-              backgroundColor: 'var(--status-error-bg)',
-              color: 'var(--status-error-text)',
-              border: '1px solid var(--status-error-border)',
-              borderRadius: 'var(--radius-sm)',
-              marginBottom: '1rem',
-              fontSize: '0.85rem',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: 'var(--text-secondary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.02em',
             }}
           >
-            {error.message}
-          </div>
-        )}
-
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}
-        >
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: 'var(--text-secondary)',
-                marginBottom: '0.3rem',
-              }}
-            >
-              Release Name <span style={{ color: '#dc2626' }}>*</span>
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. October 2026 Core Platform Upgrade"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.875rem',
-              }}
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  color: 'var(--text-secondary)',
-                  marginBottom: '0.3rem',
-                }}
-              >
-                Semantic Version <span style={{ color: '#dc2626' }}>*</span>
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. v1.2.0"
-                value={version}
-                onChange={(e) => setVersion(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem 0.75rem',
-                  fontSize: '0.875rem',
-                }}
-              />
-            </div>
-
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  color: 'var(--text-secondary)',
-                  marginBottom: '0.3rem',
-                }}
-              >
-                Target Deployment Date
-              </label>
-              <input
-                type="date"
-                value={targetDate}
-                onChange={(e) => setTargetDate(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem 0.75rem',
-                  fontSize: '0.875rem',
-                }}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: 'var(--text-secondary)',
-                marginBottom: '0.3rem',
-              }}
-            >
-              Description & Scope
-            </label>
-            <textarea
-              rows={2}
-              placeholder="Summary of changes or key components..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.875rem',
-                resize: 'vertical',
-              }}
-            />
-          </div>
-
-          {/* Initial Checklist Items */}
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: 'var(--text-secondary)',
-                marginBottom: '0.3rem',
-              }}
-            >
-              Initial Checklist Steps ({checklistItems.length})
-            </label>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.35rem',
-                marginBottom: '0.5rem',
-              }}
-            >
-              {checklistItems.map((item, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.35rem 0.6rem',
-                    backgroundColor: '#f8fafc',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.8rem',
-                  }}
-                >
-                  <span>&bull; {item}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveInlineStep(idx)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#dc2626',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <input
-                type="text"
-                placeholder="Add checklist step..."
-                value={newStepText}
-                onChange={(e) => setNewStepText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddInlineStep(e);
-                  }
-                }}
-                style={{
-                  flex: 1,
-                  padding: '0.4rem 0.6rem',
-                  fontSize: '0.8rem',
-                }}
-              />
-              <button
-                type="button"
-                onClick={handleAddInlineStep}
-                className="btn btn-secondary"
-                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
-              >
-                Add
-              </button>
-            </div>
-          </div>
+            Initial Checklist Steps ({checklistItems.length})
+          </label>
 
           <div
             style={{
               display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '0.5rem',
-              marginTop: '0.75rem',
-              borderTop: '1px solid var(--border-color)',
-              paddingTop: '0.75rem',
+              flexDirection: 'column',
+              gap: '0.35rem',
+              marginBottom: '0.4rem',
             }}
           >
-            <button type="button" onClick={onClose} className="btn btn-secondary">
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !name.trim() || !version.trim()}
-              className="btn btn-primary"
-            >
-              {loading ? 'Creating...' : 'Create Release'}
-            </button>
+            {checklistItems.map((item, idx) => (
+              <div
+                key={idx}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.4rem 0.65rem',
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.825rem',
+                }}
+              >
+                <span>&bull; {item}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveInlineStep(idx)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    padding: '0.1rem 0.3rem',
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
           </div>
-        </form>
-      </div>
-    </div>
+
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <Input
+              label="Add step"
+              placeholder="e.g. Run database migrations"
+              value={newStepText}
+              onChange={(e) => setNewStepText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddInlineStep(e);
+                }
+              }}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleAddInlineStep}
+              style={{ alignSelf: 'center', height: '48px' }}
+            >
+              Add
+            </Button>
+          </div>
+        </div>
+      </form>
+    </Modal>
   );
 };

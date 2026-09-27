@@ -6,6 +6,7 @@ import {
   GET_RELEASE,
   UPDATE_RELEASE_STEP,
 } from '../../graphql/releases.queries';
+import { Select } from '../common/form';
 
 interface Props {
   releaseId: string;
@@ -50,24 +51,26 @@ export const ReleaseChecklist: React.FC<Props> = ({ releaseId, steps }) => {
     return (
       <div
         style={{
-          padding: '2rem 1rem',
+          padding: '2.5rem 1rem',
           textAlign: 'center',
-          backgroundColor: '#f8fafc',
-          borderRadius: 'var(--radius-sm)',
+          backgroundColor: 'var(--bg-primary)',
+          borderRadius: 'var(--radius-md)',
           border: '1px dashed var(--border-color)',
           color: 'var(--text-secondary)',
         }}
       >
-        <p style={{ fontWeight: 500, fontSize: '0.9rem' }}>No checklist steps created yet.</p>
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-          Add verification steps, testing gates, or sign-offs above.
+        <p style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+          No checklist steps created yet
+        </p>
+        <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+          Add verification steps, testing gates, or sign-offs above to track progress.
         </p>
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
       {steps.map((step, index) => {
         const isComplete = step.status === StepStatus.COMPLETED;
 
@@ -78,15 +81,15 @@ export const ReleaseChecklist: React.FC<Props> = ({ releaseId, steps }) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '0.75rem 1rem',
-              backgroundColor: isComplete ? '#f8fafc' : '#ffffff',
+              padding: '0.85rem 1.15rem',
+              backgroundColor: isComplete ? 'var(--bg-primary)' : '#ffffff',
               border: '1px solid var(--border-color)',
               borderRadius: 'var(--radius-sm)',
               transition: 'background-color 0.15s ease',
             }}
           >
             {/* Checkbox & Step Info */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flex: 1 }}>
               <input
                 type="checkbox"
                 checked={isComplete}
@@ -121,9 +124,10 @@ export const ReleaseChecklist: React.FC<Props> = ({ releaseId, steps }) => {
                       style={{
                         fontSize: '0.65rem',
                         fontWeight: 600,
-                        padding: '0.1rem 0.35rem',
-                        backgroundColor: '#fef2f2',
-                        color: '#dc2626',
+                        padding: '0.1rem 0.4rem',
+                        backgroundColor: 'var(--status-error-bg)',
+                        color: 'var(--status-error-text)',
+                        border: '1px solid var(--status-error-border)',
                         borderRadius: '3px',
                       }}
                     >
@@ -148,25 +152,20 @@ export const ReleaseChecklist: React.FC<Props> = ({ releaseId, steps }) => {
 
             {/* Status Selector & Actions */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <select
-                value={step.status}
-                onChange={(e) => handleStatusChange(step.id, e.target.value as StepStatus)}
-                style={{
-                  backgroundColor: '#ffffff',
-                  color: 'var(--text-primary)',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '0.25rem 0.5rem',
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                }}
-              >
-                <option value={StepStatus.PENDING}>Pending</option>
-                <option value={StepStatus.IN_PROGRESS}>In Progress</option>
-                <option value={StepStatus.COMPLETED}>Completed</option>
-                <option value={StepStatus.BLOCKED}>Blocked</option>
-                <option value={StepStatus.SKIPPED}>Skipped</option>
-              </select>
+              <div style={{ width: '130px' }}>
+                <Select
+                  value={step.status}
+                  onChange={(e) => handleStatusChange(step.id, e.target.value as StepStatus)}
+                  style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                  options={[
+                    { value: StepStatus.PENDING, label: 'Pending' },
+                    { value: StepStatus.IN_PROGRESS, label: 'In Progress' },
+                    { value: StepStatus.COMPLETED, label: 'Completed' },
+                    { value: StepStatus.BLOCKED, label: 'Blocked' },
+                    { value: StepStatus.SKIPPED, label: 'Skipped' },
+                  ]}
+                />
+              </div>
 
               <button
                 onClick={() => handleDelete(step.id)}
@@ -176,8 +175,9 @@ export const ReleaseChecklist: React.FC<Props> = ({ releaseId, steps }) => {
                   border: 'none',
                   color: 'var(--text-muted)',
                   cursor: 'pointer',
-                  padding: '0.2rem',
+                  padding: '0.25rem',
                   fontSize: '0.9rem',
+                  borderRadius: 'var(--radius-sm)',
                 }}
               >
                 ✕

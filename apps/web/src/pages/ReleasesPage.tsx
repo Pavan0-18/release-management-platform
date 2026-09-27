@@ -7,6 +7,7 @@ import { ReleaseStatusBadge } from '../components/releases/ReleaseStatusBadge';
 import { ProgressBar } from '../components/releases/ProgressBar';
 import { CreateReleaseModal } from '../components/releases/CreateReleaseModal';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
+import { Input, Select, Button } from '../components/common/form';
 
 export const ReleasesPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -47,13 +48,13 @@ export const ReleasesPage: React.FC = () => {
             Releases
           </h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.2rem' }}>
-            Release checklist tracking and deployment management
+            Release checklist tracking and deployment governance
           </p>
         </div>
 
-        <button onClick={() => setIsCreateOpen(true)} className="btn btn-primary">
+        <Button variant="primary" onClick={() => setIsCreateOpen(true)}>
           + New Release
-        </button>
+        </Button>
       </div>
 
       {/* Summary Metrics */}
@@ -73,7 +74,7 @@ export const ReleasesPage: React.FC = () => {
               textTransform: 'uppercase',
             }}
           >
-            Total
+            Total Releases
           </div>
           <div
             style={{
@@ -117,7 +118,7 @@ export const ReleasesPage: React.FC = () => {
             Deployed
           </div>
           <div
-            style={{ fontSize: '1.5rem', fontWeight: 700, marginTop: '0.2rem', color: '#047857' }}
+            style={{ fontSize: '1.5rem', fontWeight: 700, marginTop: '0.2rem', color: '#15803d' }}
           >
             {deployedCount}
           </div>
@@ -135,7 +136,7 @@ export const ReleasesPage: React.FC = () => {
             Drafts
           </div>
           <div
-            style={{ fontSize: '1.5rem', fontWeight: 700, marginTop: '0.2rem', color: '#64748b' }}
+            style={{ fontSize: '1.5rem', fontWeight: 700, marginTop: '0.2rem', color: '#78716c' }}
           >
             {draftCount}
           </div>
@@ -146,41 +147,34 @@ export const ReleasesPage: React.FC = () => {
       <div className="card" style={{ padding: '1rem' }}>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ flex: 1, minWidth: '220px' }}>
-            <input
-              type="text"
+            <Input
               placeholder="Search releases by name or version..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.85rem',
-              }}
             />
           </div>
 
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              style={{
-                padding: '0.5rem 0.75rem',
-                fontSize: '0.85rem',
-              }}
-            >
-              <option value="">All Statuses</option>
-              <option value={ReleaseStatus.DRAFT}>Draft</option>
-              <option value={ReleaseStatus.PLANNED}>Planned</option>
-              <option value={ReleaseStatus.IN_PROGRESS}>In Progress</option>
-              <option value={ReleaseStatus.READY_FOR_DEPLOYMENT}>Ready for Deployment</option>
-              <option value={ReleaseStatus.DEPLOYED}>Deployed</option>
-              <option value={ReleaseStatus.FAILED}>Failed</option>
-              <option value={ReleaseStatus.CANCELLED}>Cancelled</option>
-            </select>
+            <div style={{ minWidth: '180px' }}>
+              <Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                options={[
+                  { value: '', label: 'All Statuses' },
+                  { value: ReleaseStatus.DRAFT, label: 'Draft' },
+                  { value: ReleaseStatus.PLANNED, label: 'Planned' },
+                  { value: ReleaseStatus.IN_PROGRESS, label: 'In Progress' },
+                  { value: ReleaseStatus.READY_FOR_DEPLOYMENT, label: 'Ready for Deployment' },
+                  { value: ReleaseStatus.DEPLOYED, label: 'Deployed' },
+                  { value: ReleaseStatus.FAILED, label: 'Failed' },
+                  { value: ReleaseStatus.CANCELLED, label: 'Cancelled' },
+                ]}
+              />
+            </div>
 
-            <button onClick={() => refetch()} className="btn btn-secondary" title="Refresh">
+            <Button variant="secondary" onClick={() => refetch()} title="Refresh">
               Refresh
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -199,14 +193,14 @@ export const ReleasesPage: React.FC = () => {
           className="card"
           style={{
             textAlign: 'center',
-            padding: '3rem 1.5rem',
+            padding: '3.5rem 1.5rem',
             border: '1px dashed var(--border-color)',
-            backgroundColor: '#f8fafc',
+            backgroundColor: 'var(--bg-primary)',
           }}
         >
           <h3
             style={{
-              fontSize: '1.1rem',
+              fontSize: '1.15rem',
               fontWeight: 600,
               color: 'var(--text-primary)',
               marginBottom: '0.35rem',
@@ -221,9 +215,9 @@ export const ReleasesPage: React.FC = () => {
               ? 'No releases match your current filters.'
               : 'Create your first release to track checklist items and deployment steps.'}
           </p>
-          <button onClick={() => setIsCreateOpen(true)} className="btn btn-primary">
+          <Button variant="primary" onClick={() => setIsCreateOpen(true)}>
             + Create First Release
-          </button>
+          </Button>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -242,7 +236,7 @@ export const ReleasesPage: React.FC = () => {
                   backgroundColor: '#ffffff',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#93c5fd';
+                  e.currentTarget.style.borderColor = 'var(--accent-primary)';
                   e.currentTarget.style.boxShadow = 'var(--shadow-md)';
                 }}
                 onMouseLeave={(e) => {
@@ -268,13 +262,13 @@ export const ReleasesPage: React.FC = () => {
                     </h3>
                     <code
                       style={{
-                        backgroundColor: '#eff6ff',
+                        backgroundColor: 'var(--accent-light)',
                         padding: '0.15rem 0.45rem',
                         borderRadius: '4px',
                         fontSize: '0.75rem',
                         color: 'var(--accent-primary)',
                         fontWeight: 600,
-                        border: '1px solid #bfdbfe',
+                        border: '1px solid #ebdcd0',
                       }}
                     >
                       {release.version}
