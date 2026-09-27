@@ -1,0 +1,36 @@
+{
+  "name": "release-management-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Production-ready Release Management Platform Monorepo",
+  "author": "",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"@rmp/*\" dev",
+    "dev:api": "pnpm --filter @rmp/api dev",
+    "dev:web": "pnpm --filter @rmp/web dev",
+    "build": "pnpm --filter @rmp/config build && pnpm --filter @rmp/shared build && pnpm --filter @rmp/api build && pnpm --filter @rmp/web build",
+    "lint": "pnpm -r run lint",
+    "lint:fix": "pnpm -r run lint --fix",
+    "test": "pnpm -r run test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md,yml,yaml}\"",
+    "db:migrate": "pnpm --filter @rmp/api prisma:migrate",
+    "db:generate": "pnpm --filter @rmp/api prisma:generate",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:build": "docker compose up --build",
+    "clean": "pnpm -r run clean"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@typescript-eslint/eslint-plugin": "^8.70.1",
+    "@typescript-eslint/parser": "^8.70.1",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.70.1"
+  },
+  "packageManager": "pnpm@10.27.0"
+}

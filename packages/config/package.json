@@ -1,0 +1,19 @@
+{
+  "name": "@rmp/config",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "files": [
+    "tsconfig.base.json",
+    "tsconfig.node.json",
+    "tsconfig.react.json",
+    "eslint-preset.js",
+    "index.js"
+  ],
+  "scripts": {
+    "build": "node -e \"console.log('@rmp/config ready')\"",
+    "lint": "node -e \"console.log('No linting needed for config')\"",
+    "test": "node -e \"console.log('No tests needed for config')\"",
+    "clean": "node -e \"console.log('Config clean')\""
+  }
+}

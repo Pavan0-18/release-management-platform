@@ -1,0 +1,25 @@
+{
+  "name": "@rmp/shared",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src",
+    "test": "node -e \"console.log('@rmp/shared smoke test passed')\"",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@rmp/config": "workspace:*",
+    "@types/node": "^22.13.10",
+    "eslint": "^9.22.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.2"
+  }
+}
