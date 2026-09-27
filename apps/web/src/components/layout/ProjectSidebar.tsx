@@ -3,7 +3,6 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { ProjectNature } from '@rmp/shared';
 import { useProjects } from '../../hooks/useProjects';
 import { Input, Button } from '../common/form';
-import { Tooltip } from '../common/Tooltip';
 import { CreateProjectModal } from '../projects/CreateProjectModal';
 
 interface ProjectSidebarProps {
@@ -89,7 +88,7 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
         />
       </div>
 
-      {/* Project Items List - Single Line layout */}
+      {/* Project Items List - Clean Single Line layout */}
       <div
         style={{
           padding: '0.35rem 0.6rem 0.75rem 0.6rem',
@@ -145,6 +144,7 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
                 onClick={() => {
                   if (onCloseMobile) onCloseMobile();
                 }}
+                title={`Project: [${project.key}] ${project.name}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -163,82 +163,78 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
                     ? '1px solid var(--accent-primary)'
                     : '1px solid transparent',
                   boxSizing: 'border-box',
+                  overflow: 'hidden',
                 }}
               >
-                {/* Project Key & Name with Tooltip */}
-                <Tooltip content={`Project: [${project.key}] ${project.name}`} position="right">
-                  <div
+                {/* Project Key & Name */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.45rem',
+                    minWidth: 0,
+                    flex: 1,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <span
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.45rem',
-                      minWidth: 0,
-                      flex: 1,
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      backgroundColor: isProjectActive ? 'var(--accent-primary)' : '#ede5dc',
+                      color: isProjectActive ? '#ffffff' : 'var(--accent-primary)',
+                      padding: '0.12rem 0.35rem',
+                      borderRadius: '3px',
+                      letterSpacing: '0.02em',
+                      flexShrink: 0,
+                    }}
+                    title={`Project Key: ${project.key}`}
+                  >
+                    {project.key}
+                  </span>
+                  <span
+                    style={{
+                      fontWeight: isProjectActive ? 700 : 500,
+                      whiteSpace: 'nowrap',
                       overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      fontSize: '0.85rem',
                     }}
                   >
-                    <span
-                      style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 700,
-                        backgroundColor: isProjectActive ? 'var(--accent-primary)' : '#ede5dc',
-                        color: isProjectActive ? '#ffffff' : 'var(--accent-primary)',
-                        padding: '0.12rem 0.35rem',
-                        borderRadius: '3px',
-                        letterSpacing: '0.02em',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {project.key}
-                    </span>
-                    <span
-                      style={{
-                        fontWeight: isProjectActive ? 700 : 500,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        fontSize: '0.85rem',
-                      }}
-                    >
-                      {project.name}
-                    </span>
-                  </div>
-                </Tooltip>
+                    {project.name}
+                  </span>
+                </div>
 
-                {/* Project Type Badge with Tooltip */}
+                {/* Project Type Badge & Release Count */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
                   {isMicroservices ? (
-                    <Tooltip content={`Project Type: Microservices (${serviceCount} services)`} position="left">
-                      <span
-                        style={{
-                          fontSize: '0.6rem',
-                          fontWeight: 700,
-                          color: '#0369a1',
-                          backgroundColor: '#e0f2fe',
-                          padding: '0.05rem 0.3rem',
-                          borderRadius: '3px',
-                          cursor: 'default',
-                        }}
-                      >
-                        MS
-                      </span>
-                    </Tooltip>
+                    <span
+                      style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 700,
+                        color: '#0369a1',
+                        backgroundColor: '#e0f2fe',
+                        padding: '0.05rem 0.3rem',
+                        borderRadius: '3px',
+                      }}
+                      title={`Project Type: Microservices (${serviceCount} services)`}
+                    >
+                      MS
+                    </span>
                   ) : (
-                    <Tooltip content="Project Type: Monolith (Single repository)" position="left">
-                      <span
-                        style={{
-                          fontSize: '0.6rem',
-                          fontWeight: 700,
-                          color: '#57534e',
-                          backgroundColor: '#f5f5f4',
-                          padding: '0.05rem 0.3rem',
-                          borderRadius: '3px',
-                          cursor: 'default',
-                        }}
-                      >
-                        MN
-                      </span>
-                    </Tooltip>
+                    <span
+                      style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 700,
+                        color: '#57534e',
+                        backgroundColor: '#f5f5f4',
+                        padding: '0.05rem 0.3rem',
+                        borderRadius: '3px',
+                      }}
+                      title="Project Type: Monolith (Single repository)"
+                    >
+                      MN
+                    </span>
                   )}
 
                   <span
@@ -250,6 +246,7 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
                       padding: '0.05rem 0.4rem',
                       borderRadius: '999px',
                     }}
+                    title={`${project.totalReleases || 0} releases`}
                   >
                     {project.totalReleases || 0}
                   </span>

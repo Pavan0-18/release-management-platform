@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ReleaseStatus, ProjectNature } from '@rmp/shared';
-import { useReleases } from '../hooks/useReleases';
+import { useReleases, useUpdateRelease } from '../hooks/useReleases';
 import { useProject, useProjects } from '../hooks/useProjects';
-import { ReleaseStatusBadge } from '../components/releases/ReleaseStatusBadge';
 import { CreateReleaseModal } from '../components/releases/CreateReleaseModal';
 import { CreateProjectModal } from '../components/projects/CreateProjectModal';
 import { ManageServicesModal } from '../components/projects/ManageServicesModal';
@@ -26,6 +25,7 @@ export const ReleasesPage: React.FC = () => {
   const activeProjectId = projectId || (allProjects.length > 0 ? allProjects[0].id : undefined);
 
   const { data: currentProject, isLoading: isLoadingCurrentProject } = useProject(activeProjectId);
+  const updateReleaseMutation = useUpdateRelease();
 
   // Auto redirect from /releases to first project if available
   useEffect(() => {
@@ -67,6 +67,39 @@ export const ReleasesPage: React.FC = () => {
     (r) => r.status === ReleaseStatus.READY_FOR_DEPLOYMENT,
   ).length;
   const draftCount = allProjectReleases.filter((r) => r.status === ReleaseStatus.DRAFT).length;
+
+  const handleStatusChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+    releaseId: string,
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newStatus = e.target.value as ReleaseStatus;
+    updateReleaseMutation.mutate({
+      id: releaseId,
+      status: newStatus,
+    });
+  };
+
+  const getStatusBadgeColors = (status: ReleaseStatus) => {
+    switch (status) {
+      case ReleaseStatus.DEPLOYED:
+        return { bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0' };
+      case ReleaseStatus.READY_FOR_DEPLOYMENT:
+        return { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' };
+      case ReleaseStatus.IN_PROGRESS:
+        return { bg: '#fffbeb', color: '#b45309', border: '#fde68a' };
+      case ReleaseStatus.FAILED:
+        return { bg: '#fef2f2', color: '#991b1b', border: '#fecaca' };
+      case ReleaseStatus.CANCELLED:
+        return { bg: '#f5f5f4', color: '#78716c', border: '#e7e5e4' };
+      case ReleaseStatus.PLANNED:
+        return { bg: '#fdf4ff', color: '#86198f', border: '#f5d0fe' };
+      case ReleaseStatus.DRAFT:
+      default:
+        return { bg: '#f5f5f4', color: '#57534e', border: '#e7e5e4' };
+    }
+  };
 
   if (isLoadingProjects || (!currentProject && isLoadingCurrentProject)) {
     return <LoadingSpinner message="Loading workspace..." />;
@@ -384,7 +417,7 @@ export const ReleasesPage: React.FC = () => {
         </div>
       )}
 
-      {/* 4. Releases List */}
+      {/* 4. Releases List with Direct Status Change */}
       {isLoadingReleases ? (
         <LoadingSpinner message="Loading releases..." />
       ) : error ? (
@@ -412,78 +445,125 @@ export const ReleasesPage: React.FC = () => {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {releases.map((release) => (
-            <Link
-              key={release.id}
-              to={`/releases/${release.id}`}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0.85rem 1rem',
-                textDecoration: 'none',
-                color: 'inherit',
-                backgroundColor: '#ffffff',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-md)',
-                transition: 'all 0.15s ease',
-                gap: '1rem',
-                flexWrap: 'wrap',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
-                <span
-                  style={{
-                    fontFamily: 'monospace',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    color: 'var(--accent-primary)',
-                    backgroundColor: '#ede5dc',
-                    padding: '0.15rem 0.4rem',
-                    borderRadius: '4px',
-                  }}
-                >
-                  {release.version}
-                </span>
+          {releases.map((release) => {
+            const badgeColors = getStatusBadgeColors(release.status);
 
-                {release.serviceName && (
+            return (
+              <Link
+                key={release.id}
+                to={`/releases/${release.id}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.75rem 1rem',
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md)',
+                  transition: 'all 0.15s ease',
+                  gap: '1rem',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
                   <span
                     style={{
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      padding: '0.1rem 0.4rem',
-                      borderRadius: '4px',
-                      backgroundColor: '#e0f2fe',
-                      color: '#0369a1',
                       fontFamily: 'monospace',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      color: 'var(--accent-primary)',
+                      backgroundColor: '#ede5dc',
+                      padding: '0.15rem 0.4rem',
+                      borderRadius: '4px',
                     }}
                   >
-                    {release.serviceName}
+                    {release.version}
                   </span>
-                )}
 
-                <span
-                  style={{
-                    fontWeight: 600,
-                    fontSize: '0.9rem',
-                    color: 'var(--text-primary)',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {release.name}
-                </span>
-              </div>
+                  {release.serviceName && (
+                    <span
+                      style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        padding: '0.1rem 0.4rem',
+                        borderRadius: '4px',
+                        backgroundColor: '#e0f2fe',
+                        color: '#0369a1',
+                        fontFamily: 'monospace',
+                      }}
+                    >
+                      {release.serviceName}
+                    </span>
+                  )}
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexShrink: 0 }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                  Gates: {release.completedSteps}/{release.totalSteps}
-                </span>
-                <ReleaseStatusBadge status={release.status} />
-              </div>
-            </Link>
-          ))}
+                  <span
+                    style={{
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      color: 'var(--text-primary)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {release.name}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                    Gates: {release.completedSteps}/{release.totalSteps}
+                  </span>
+
+                  {/* Direct Status Selector Dropdown */}
+                  <div
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    style={{ position: 'relative' }}
+                  >
+                    <select
+                      value={release.status}
+                      disabled={updateReleaseMutation.isPending}
+                      onChange={(e) => handleStatusChange(e, release.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        appearance: 'none',
+                        WebkitAppearance: 'none',
+                        MozAppearance: 'none',
+                        backgroundColor: badgeColors.bg,
+                        color: badgeColors.color,
+                        border: `1px solid ${badgeColors.border}`,
+                        borderRadius: '999px',
+                        padding: '0.2rem 1.4rem 0.2rem 0.6rem',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        outline: 'none',
+                        lineHeight: 1.2,
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='${encodeURIComponent(badgeColors.color)}' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+                        backgroundPosition: 'right 0.35rem center',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: '12px',
+                      }}
+                      title="Click to change status"
+                    >
+                      <option value={ReleaseStatus.DRAFT}>Draft</option>
+                      <option value={ReleaseStatus.PLANNED}>Planned</option>
+                      <option value={ReleaseStatus.IN_PROGRESS}>In Progress</option>
+                      <option value={ReleaseStatus.READY_FOR_DEPLOYMENT}>Ready for Deployment</option>
+                      <option value={ReleaseStatus.DEPLOYED}>Deployed</option>
+                      <option value={ReleaseStatus.FAILED}>Failed</option>
+                      <option value={ReleaseStatus.CANCELLED}>Cancelled</option>
+                    </select>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
 
