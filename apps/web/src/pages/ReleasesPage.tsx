@@ -31,7 +31,7 @@ export const ReleasesPage: React.FC = () => {
   const draftCount = releases.filter((r) => r.status === ReleaseStatus.DRAFT).length;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Page Header */}
       <div
         style={{
@@ -43,12 +43,11 @@ export const ReleasesPage: React.FC = () => {
         }}
       >
         <div>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.025em' }}>
-            Release Governance
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+            Releases
           </h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
-            Track, verify, and orchestrate software deployment checklists across target
-            environments.
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+            Release checklist tracking and deployment management
           </p>
         </div>
 
@@ -61,30 +60,37 @@ export const ReleasesPage: React.FC = () => {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gap: '0.75rem',
         }}
       >
-        <div className="card" style={{ padding: '1.25rem' }}>
+        <div className="card" style={{ padding: '1rem' }}>
           <div
             style={{
-              fontSize: '0.8rem',
+              fontSize: '0.75rem',
               color: 'var(--text-secondary)',
               fontWeight: 600,
               textTransform: 'uppercase',
             }}
           >
-            Total Releases
+            Total
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 700, marginTop: '0.25rem' }}>
+          <div
+            style={{
+              fontSize: '1.5rem',
+              fontWeight: 700,
+              marginTop: '0.2rem',
+              color: 'var(--text-primary)',
+            }}
+          >
             {totalCount}
           </div>
         </div>
 
-        <div className="card" style={{ padding: '1.25rem' }}>
+        <div className="card" style={{ padding: '1rem' }}>
           <div
             style={{
-              fontSize: '0.8rem',
+              fontSize: '0.75rem',
               color: 'var(--text-secondary)',
               fontWeight: 600,
               textTransform: 'uppercase',
@@ -93,16 +99,16 @@ export const ReleasesPage: React.FC = () => {
             In Progress
           </div>
           <div
-            style={{ fontSize: '1.75rem', fontWeight: 700, marginTop: '0.25rem', color: '#fbbf24' }}
+            style={{ fontSize: '1.5rem', fontWeight: 700, marginTop: '0.2rem', color: '#b45309' }}
           >
             {inProgressCount}
           </div>
         </div>
 
-        <div className="card" style={{ padding: '1.25rem' }}>
+        <div className="card" style={{ padding: '1rem' }}>
           <div
             style={{
-              fontSize: '0.8rem',
+              fontSize: '0.75rem',
               color: 'var(--text-secondary)',
               fontWeight: 600,
               textTransform: 'uppercase',
@@ -111,16 +117,16 @@ export const ReleasesPage: React.FC = () => {
             Deployed
           </div>
           <div
-            style={{ fontSize: '1.75rem', fontWeight: 700, marginTop: '0.25rem', color: '#34d399' }}
+            style={{ fontSize: '1.5rem', fontWeight: 700, marginTop: '0.2rem', color: '#047857' }}
           >
             {deployedCount}
           </div>
         </div>
 
-        <div className="card" style={{ padding: '1.25rem' }}>
+        <div className="card" style={{ padding: '1rem' }}>
           <div
             style={{
-              fontSize: '0.8rem',
+              fontSize: '0.75rem',
               color: 'var(--text-secondary)',
               fontWeight: 600,
               textTransform: 'uppercase',
@@ -129,7 +135,7 @@ export const ReleasesPage: React.FC = () => {
             Drafts
           </div>
           <div
-            style={{ fontSize: '1.75rem', fontWeight: 700, marginTop: '0.25rem', color: '#9ca3af' }}
+            style={{ fontSize: '1.5rem', fontWeight: 700, marginTop: '0.2rem', color: '#64748b' }}
           >
             {draftCount}
           </div>
@@ -137,38 +143,29 @@ export const ReleasesPage: React.FC = () => {
       </div>
 
       {/* Filters & Search Toolbar */}
-      <div className="card" style={{ padding: '1.25rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ flex: 1, minWidth: '240px' }}>
+      <div className="card" style={{ padding: '1rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ flex: 1, minWidth: '220px' }}>
             <input
               type="text"
-              placeholder="Search by release name, version..."
+              placeholder="Search releases by name or version..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
                 width: '100%',
-                padding: '0.6rem 0.85rem',
-                backgroundColor: 'var(--bg-primary)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-sm)',
-                color: 'var(--text-primary)',
-                fontSize: '0.9rem',
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.85rem',
               }}
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               style={{
-                padding: '0.6rem 0.85rem',
-                backgroundColor: 'var(--bg-primary)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-sm)',
-                color: 'var(--text-primary)',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.85rem',
               }}
             >
               <option value="">All Statuses</option>
@@ -181,11 +178,7 @@ export const ReleasesPage: React.FC = () => {
               <option value={ReleaseStatus.CANCELLED}>Cancelled</option>
             </select>
 
-            <button
-              onClick={() => refetch()}
-              className="btn btn-secondary"
-              title="Refresh releases"
-            >
+            <button onClick={() => refetch()} className="btn btn-secondary" title="Refresh">
               Refresh
             </button>
           </div>
@@ -206,32 +199,34 @@ export const ReleasesPage: React.FC = () => {
           className="card"
           style={{
             textAlign: 'center',
-            padding: '4rem 1.5rem',
+            padding: '3rem 1.5rem',
             border: '1px dashed var(--border-color)',
+            backgroundColor: '#f8fafc',
           }}
         >
-          <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🚀</div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+          <h3
+            style={{
+              fontSize: '1.1rem',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+              marginBottom: '0.35rem',
+            }}
+          >
             No Releases Found
           </h3>
           <p
-            style={{
-              color: 'var(--text-secondary)',
-              marginBottom: '1.5rem',
-              maxWidth: '400px',
-              margin: '0 auto 1.5rem',
-            }}
+            style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.25rem' }}
           >
             {searchTerm || statusFilter
-              ? 'No releases match your current search and filter criteria.'
-              : 'Create your first release to initialize step verification checklists and deployment gates.'}
+              ? 'No releases match your current filters.'
+              : 'Create your first release to track checklist items and deployment steps.'}
           </p>
           <button onClick={() => setIsCreateOpen(true)} className="btn btn-primary">
             + Create First Release
           </button>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {releases.map((release) => (
             <Link
               key={release.id}
@@ -241,45 +236,55 @@ export const ReleasesPage: React.FC = () => {
               <div
                 className="card"
                 style={{
-                  transition: 'transform 0.15s ease, border-color 0.15s ease',
+                  padding: '1.25rem',
+                  transition: 'all 0.15s ease',
                   cursor: 'pointer',
+                  backgroundColor: '#ffffff',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--accent-primary)';
+                  e.currentTarget.style.borderColor = '#93c5fd';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = 'var(--border-color)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
                 }}
               >
                 <div
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'flex-start',
+                    alignItems: 'center',
                     flexWrap: 'wrap',
-                    gap: '0.75rem',
-                    marginBottom: '0.75rem',
+                    gap: '0.5rem',
+                    marginBottom: '0.5rem',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>{release.name}</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <h3
+                      style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}
+                    >
+                      {release.name}
+                    </h3>
                     <code
                       style={{
-                        backgroundColor: 'var(--bg-primary)',
-                        padding: '0.2rem 0.5rem',
+                        backgroundColor: '#eff6ff',
+                        padding: '0.15rem 0.45rem',
                         borderRadius: '4px',
-                        fontSize: '0.8rem',
+                        fontSize: '0.75rem',
                         color: 'var(--accent-primary)',
+                        fontWeight: 600,
+                        border: '1px solid #bfdbfe',
                       }}
                     >
                       {release.version}
                     </code>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                     <ReleaseStatusBadge status={release.status} />
                     {release.targetDate && (
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                         Target: {new Date(release.targetDate).toLocaleDateString()}
                       </span>
                     )}
@@ -290,28 +295,28 @@ export const ReleasesPage: React.FC = () => {
                   <p
                     style={{
                       color: 'var(--text-secondary)',
-                      fontSize: '0.9rem',
-                      marginBottom: '1rem',
+                      fontSize: '0.85rem',
+                      marginBottom: '0.75rem',
                     }}
                   >
                     {release.description}
                   </p>
                 )}
 
-                {/* Progress Bar & Checklist Summary */}
-                <div style={{ marginTop: '0.75rem' }}>
+                {/* Progress Bar & Summary */}
+                <div>
                   <div
                     style={{
                       display: 'flex',
                       justifyContent: 'space-between',
-                      fontSize: '0.8rem',
+                      fontSize: '0.75rem',
                       color: 'var(--text-secondary)',
-                      marginBottom: '0.35rem',
+                      marginBottom: '0.25rem',
                     }}
                   >
                     <span>Checklist Progress</span>
                     <span>
-                      {release.completedSteps || 0} / {release.totalSteps || 0} Steps Verified
+                      {release.completedSteps || 0} of {release.totalSteps || 0} steps verified
                     </span>
                   </div>
                   <ProgressBar percentage={release.progressPercentage || 0} />

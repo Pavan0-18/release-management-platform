@@ -78,15 +78,16 @@ export const ReleaseDetailPage: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      {/* Breadcrumb & Navigation */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Top Breadcrumb & Action */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Link
           to="/releases"
           style={{
             color: 'var(--text-secondary)',
             textDecoration: 'none',
-            fontSize: '0.9rem',
+            fontSize: '0.875rem',
+            fontWeight: 500,
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.35rem',
@@ -99,13 +100,18 @@ export const ReleaseDetailPage: React.FC = () => {
           onClick={handleDeleteRelease}
           disabled={deleting}
           className="btn btn-secondary"
-          style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)', fontSize: '0.85rem' }}
+          style={{
+            color: '#dc2626',
+            borderColor: '#fecaca',
+            fontSize: '0.8rem',
+            padding: '0.35rem 0.75rem',
+          }}
         >
           {deleting ? 'Deleting...' : 'Delete Release'}
         </button>
       </div>
 
-      {/* Release Overview Card */}
+      {/* Release Overview Header */}
       <div className="card">
         <div
           style={{
@@ -114,7 +120,7 @@ export const ReleaseDetailPage: React.FC = () => {
             alignItems: 'flex-start',
             flexWrap: 'wrap',
             gap: '1rem',
-            marginBottom: '1.25rem',
+            marginBottom: '1rem',
           }}
         >
           <div>
@@ -122,42 +128,45 @@ export const ReleaseDetailPage: React.FC = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.75rem',
-                marginBottom: '0.5rem',
+                gap: '0.6rem',
+                marginBottom: '0.35rem',
               }}
             >
-              <h2 style={{ fontSize: '1.75rem', fontWeight: 700 }}>{release.name}</h2>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                {release.name}
+              </h2>
               <code
                 style={{
-                  backgroundColor: 'var(--bg-primary)',
-                  padding: '0.25rem 0.65rem',
+                  backgroundColor: '#eff6ff',
+                  padding: '0.2rem 0.5rem',
                   borderRadius: '4px',
-                  fontSize: '0.9rem',
+                  fontSize: '0.85rem',
                   color: 'var(--accent-primary)',
                   fontWeight: 600,
+                  border: '1px solid #bfdbfe',
                 }}
               >
                 {release.version}
               </code>
             </div>
             {release.description && (
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                 {release.description}
               </p>
             )}
           </div>
 
-          {/* Status Control */}
+          {/* Status Controls */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'flex-end',
-              gap: '0.5rem',
+              gap: '0.4rem',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Status:</span>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Status:</span>
               <ReleaseStatusBadge status={release.status} />
             </div>
 
@@ -166,13 +175,8 @@ export const ReleaseDetailPage: React.FC = () => {
               disabled={updating}
               onChange={(e) => handleStatusChange(e.target.value as ReleaseStatus)}
               style={{
-                padding: '0.4rem 0.75rem',
-                backgroundColor: 'var(--bg-primary)',
-                color: 'var(--text-primary)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-sm)',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
+                padding: '0.35rem 0.65rem',
+                fontSize: '0.8rem',
               }}
             >
               <option value={ReleaseStatus.DRAFT}>Draft</option>
@@ -186,46 +190,48 @@ export const ReleaseDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Target Date & Metadata */}
+        {/* Metadata Details */}
         <div
           style={{
             display: 'flex',
-            gap: '2rem',
+            gap: '1.5rem',
             flexWrap: 'wrap',
             borderTop: '1px solid var(--border-color)',
-            paddingTop: '1rem',
+            paddingTop: '0.85rem',
             marginTop: '0.5rem',
-            fontSize: '0.85rem',
+            fontSize: '0.8rem',
             color: 'var(--text-secondary)',
           }}
         >
           <div>
-            <strong>Target Date:</strong>{' '}
+            <strong style={{ color: 'var(--text-primary)' }}>Target Date:</strong>{' '}
             {release.targetDate ? new Date(release.targetDate).toLocaleDateString() : 'Unscheduled'}
           </div>
           <div>
-            <strong>Created:</strong> {new Date(release.createdAt).toLocaleDateString()}
+            <strong style={{ color: 'var(--text-primary)' }}>Created:</strong>{' '}
+            {new Date(release.createdAt).toLocaleDateString()}
           </div>
           <div>
-            <strong>Last Updated:</strong> {new Date(release.updatedAt).toLocaleTimeString()}
+            <strong style={{ color: 'var(--text-primary)' }}>Updated:</strong>{' '}
+            {new Date(release.updatedAt).toLocaleTimeString()}
           </div>
         </div>
 
-        {/* Overall Checklist Progress */}
-        <div style={{ marginTop: '1.25rem' }}>
+        {/* Progress Tracker */}
+        <div style={{ marginTop: '1rem' }}>
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
-              fontSize: '0.85rem',
+              fontSize: '0.8rem',
               fontWeight: 600,
               color: 'var(--text-secondary)',
-              marginBottom: '0.4rem',
+              marginBottom: '0.35rem',
             }}
           >
-            <span>Release Checklist Verification</span>
+            <span>Verification Progress</span>
             <span>
-              {release.completedSteps || 0} / {release.totalSteps || 0} Steps Verified (
+              {release.completedSteps || 0} of {release.totalSteps || 0} steps completed (
               {release.progressPercentage || 0}%)
             </span>
           </div>
@@ -240,21 +246,24 @@ export const ReleaseDetailPage: React.FC = () => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '1.25rem',
+            marginBottom: '1rem',
+            borderBottom: '1px solid var(--border-color)',
+            paddingBottom: '0.75rem',
           }}
         >
           <div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Verification Checklist Steps</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-              Ensure all required gates and verifications are marked completed prior to production
-              promotion.
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Checklist Steps
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.15rem' }}>
+              Verification gates required before promotion
             </p>
           </div>
 
           <button
             onClick={() => setIsAddStepOpen(true)}
             className="btn btn-primary"
-            style={{ fontSize: '0.85rem' }}
+            style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
           >
             + Add Step
           </button>

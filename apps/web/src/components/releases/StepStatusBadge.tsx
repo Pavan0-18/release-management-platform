@@ -9,42 +9,17 @@ export const StepStatusBadge: React.FC<Props> = ({ status }) => {
   const getStatusConfig = (s: string) => {
     switch (s) {
       case StepStatus.PENDING:
-        return {
-          label: 'Pending',
-          bg: 'rgba(107, 114, 128, 0.15)',
-          color: '#9ca3af',
-          border: '#4b5563',
-        };
+        return { label: 'Pending', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1' };
       case StepStatus.IN_PROGRESS:
-        return {
-          label: 'In Progress',
-          bg: 'rgba(245, 158, 11, 0.15)',
-          color: '#fbbf24',
-          border: '#d97706',
-        };
+        return { label: 'In Progress', bg: '#fffbeb', color: '#b45309', border: '#fde68a' };
       case StepStatus.COMPLETED:
-        return {
-          label: 'Completed',
-          bg: 'rgba(16, 185, 129, 0.15)',
-          color: '#34d399',
-          border: '#059669',
-        };
+        return { label: 'Completed', bg: '#ecfdf5', color: '#047857', border: '#a7f3d0' };
       case StepStatus.BLOCKED:
-        return {
-          label: 'Blocked',
-          bg: 'rgba(239, 68, 68, 0.15)',
-          color: '#f87171',
-          border: '#dc2626',
-        };
+        return { label: 'Blocked', bg: '#fef2f2', color: '#b91c1c', border: '#fecaca' };
       case StepStatus.SKIPPED:
-        return {
-          label: 'Skipped',
-          bg: 'rgba(156, 163, 175, 0.15)',
-          color: '#d1d5db',
-          border: '#6b7280',
-        };
+        return { label: 'Skipped', bg: '#f8fafc', color: '#64748b', border: '#e2e8f0' };
       default:
-        return { label: s, bg: 'rgba(107, 114, 128, 0.15)', color: '#9ca3af', border: '#4b5563' };
+        return { label: s, bg: '#f1f5f9', color: '#475569', border: '#cbd5e1' };
     }
   };
 
@@ -55,7 +30,7 @@ export const StepStatusBadge: React.FC<Props> = ({ status }) => {
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        padding: '0.2rem 0.55rem',
+        padding: '0.15rem 0.5rem',
         borderRadius: '9999px',
         fontSize: '0.7rem',
         fontWeight: 600,

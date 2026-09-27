@@ -14,7 +14,7 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
   const [description, setDescription] = useState('');
   const [targetDate, setTargetDate] = useState('');
   const [checklistItems, setChecklistItems] = useState<string[]>([
-    'Run full test suite',
+    'Run automated test suite',
     'Verify staging deployment',
     'Perform security audit check',
   ]);
@@ -71,8 +71,8 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(4px)',
+        backgroundColor: 'rgba(15, 23, 42, 0.4)',
+        backdropFilter: 'blur(2px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -83,12 +83,12 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
       <div
         className="card"
         style={{
-          maxWidth: '560px',
+          maxWidth: '520px',
           width: '100%',
           maxHeight: '90vh',
           overflowY: 'auto',
-          backgroundColor: 'var(--bg-secondary)',
-          border: '1px solid var(--border-color)',
+          backgroundColor: '#ffffff',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
         }}
       >
         <div
@@ -96,30 +96,35 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '1.25rem',
+            marginBottom: '1rem',
+            borderBottom: '1px solid var(--border-color)',
+            paddingBottom: '0.75rem',
           }}
         >
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Create New Release</h3>
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+            Create New Release
+          </h3>
           <button
             onClick={onClose}
             style={{
               background: 'none',
               border: 'none',
               color: 'var(--text-muted)',
-              fontSize: '1.5rem',
+              fontSize: '1.25rem',
               cursor: 'pointer',
             }}
           >
-            &times;
+            ✕
           </button>
         </div>
 
         {error && (
           <div
             style={{
-              padding: '0.75rem',
+              padding: '0.65rem 0.85rem',
               backgroundColor: 'var(--status-error-bg)',
               color: 'var(--status-error-text)',
+              border: '1px solid var(--status-error-border)',
               borderRadius: 'var(--radius-sm)',
               marginBottom: '1rem',
               fontSize: '0.85rem',
@@ -131,18 +136,19 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
 
         <form
           onSubmit={handleSubmit}
-          style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+          style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}
         >
           <div>
             <label
               style={{
                 display: 'block',
-                fontSize: '0.85rem',
+                fontSize: '0.8rem',
                 fontWeight: 600,
-                marginBottom: '0.35rem',
+                color: 'var(--text-secondary)',
+                marginBottom: '0.3rem',
               }}
             >
-              Release Name <span style={{ color: '#ef4444' }}>*</span>
+              Release Name <span style={{ color: '#dc2626' }}>*</span>
             </label>
             <input
               type="text"
@@ -152,27 +158,24 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
               onChange={(e) => setName(e.target.value)}
               style={{
                 width: '100%',
-                padding: '0.65rem 0.85rem',
-                backgroundColor: 'var(--bg-primary)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-sm)',
-                color: 'var(--text-primary)',
-                fontSize: '0.9rem',
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.875rem',
               }}
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <div>
               <label
                 style={{
                   display: 'block',
-                  fontSize: '0.85rem',
+                  fontSize: '0.8rem',
                   fontWeight: 600,
-                  marginBottom: '0.35rem',
+                  color: 'var(--text-secondary)',
+                  marginBottom: '0.3rem',
                 }}
               >
-                Semantic Version <span style={{ color: '#ef4444' }}>*</span>
+                Semantic Version <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <input
                 type="text"
@@ -182,12 +185,8 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
                 onChange={(e) => setVersion(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '0.65rem 0.85rem',
-                  backgroundColor: 'var(--bg-primary)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius-sm)',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.9rem',
+                  padding: '0.5rem 0.75rem',
+                  fontSize: '0.875rem',
                 }}
               />
             </div>
@@ -196,9 +195,10 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
               <label
                 style={{
                   display: 'block',
-                  fontSize: '0.85rem',
+                  fontSize: '0.8rem',
                   fontWeight: 600,
-                  marginBottom: '0.35rem',
+                  color: 'var(--text-secondary)',
+                  marginBottom: '0.3rem',
                 }}
               >
                 Target Deployment Date
@@ -209,12 +209,8 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
                 onChange={(e) => setTargetDate(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '0.65rem 0.85rem',
-                  backgroundColor: 'var(--bg-primary)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius-sm)',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.9rem',
+                  padding: '0.5rem 0.75rem',
+                  fontSize: '0.875rem',
                 }}
               />
             </div>
@@ -224,26 +220,23 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
             <label
               style={{
                 display: 'block',
-                fontSize: '0.85rem',
+                fontSize: '0.8rem',
                 fontWeight: 600,
-                marginBottom: '0.35rem',
+                color: 'var(--text-secondary)',
+                marginBottom: '0.3rem',
               }}
             >
               Description & Scope
             </label>
             <textarea
               rows={2}
-              placeholder="Summary of changes, key components, or deployment criteria..."
+              placeholder="Summary of changes or key components..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               style={{
                 width: '100%',
-                padding: '0.65rem 0.85rem',
-                backgroundColor: 'var(--bg-primary)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-sm)',
-                color: 'var(--text-primary)',
-                fontSize: '0.9rem',
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.875rem',
                 resize: 'vertical',
               }}
             />
@@ -254,18 +247,19 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
             <label
               style={{
                 display: 'block',
-                fontSize: '0.85rem',
+                fontSize: '0.8rem',
                 fontWeight: 600,
-                marginBottom: '0.35rem',
+                color: 'var(--text-secondary)',
+                marginBottom: '0.3rem',
               }}
             >
-              Initial Verification Checklist ({checklistItems.length})
+              Initial Checklist Steps ({checklistItems.length})
             </label>
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.4rem',
+                gap: '0.35rem',
                 marginBottom: '0.5rem',
               }}
             >
@@ -276,10 +270,11 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '0.4rem 0.6rem',
-                    backgroundColor: 'var(--bg-primary)',
+                    padding: '0.35rem 0.6rem',
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid var(--border-color)',
                     borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.85rem',
+                    fontSize: '0.8rem',
                   }}
                 >
                   <span>&bull; {item}</span>
@@ -289,11 +284,11 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#ef4444',
+                      color: '#dc2626',
                       cursor: 'pointer',
                     }}
                   >
-                    &times;
+                    ✕
                   </button>
                 </div>
               ))}
@@ -313,19 +308,15 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
                 }}
                 style={{
                   flex: 1,
-                  padding: '0.4rem 0.65rem',
-                  backgroundColor: 'var(--bg-primary)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 'var(--radius-sm)',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.85rem',
+                  padding: '0.4rem 0.6rem',
+                  fontSize: '0.8rem',
                 }}
               />
               <button
                 type="button"
                 onClick={handleAddInlineStep}
                 className="btn btn-secondary"
-                style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
               >
                 Add
               </button>
@@ -336,8 +327,10 @@ export const CreateReleaseModal: React.FC<Props> = ({ isOpen, onClose, onSuccess
             style={{
               display: 'flex',
               justifyContent: 'flex-end',
-              gap: '0.75rem',
-              marginTop: '1rem',
+              gap: '0.5rem',
+              marginTop: '0.75rem',
+              borderTop: '1px solid var(--border-color)',
+              paddingTop: '0.75rem',
             }}
           >
             <button type="button" onClick={onClose} className="btn btn-secondary">

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
+import { Link } from 'react-router-dom';
 import { GET_HEALTH_STATUS } from '../graphql/health.queries';
 import { API_URL } from '../apollo/client';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
@@ -15,41 +16,38 @@ export const DashboardPage: React.FC = () => {
   const isDbConnected = healthStatus?.database === 'CONNECTED';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      {/* Hero Banner */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Top Banner */}
       <div
         className="card"
         style={{
-          background:
-            'linear-gradient(180deg, rgba(31, 41, 55, 0.9) 0%, rgba(17, 24, 39, 0.95) 100%)',
-          borderColor: 'var(--border-color)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            flexWrap: 'wrap',
-            gap: '1rem',
-          }}
-        >
-          <div>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-              Release Management Platform
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>
-              Enterprise-grade Multi-Tenant Release & Deployment Governance System
-            </p>
-          </div>
+        <div>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+            Release Management Platform
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+            Release governance and deployment checklist system
+          </p>
+        </div>
 
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <Link to="/releases" className="btn btn-primary">
+            View Releases &rarr;
+          </Link>
           <button
             onClick={() => refetch()}
             className="btn btn-secondary"
             title="Recheck system status"
             disabled={loading}
           >
-            {loading ? 'Checking...' : 'Refresh Status'}
+            {loading ? 'Checking...' : 'Refresh'}
           </button>
         </div>
       </div>
@@ -58,8 +56,8 @@ export const DashboardPage: React.FC = () => {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '1.5rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: '1rem',
         }}
       >
         {/* Frontend Status Card */}
@@ -69,28 +67,28 @@ export const DashboardPage: React.FC = () => {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '1rem',
+              marginBottom: '0.75rem',
             }}
           >
             <span
               style={{
-                fontSize: '0.875rem',
+                fontSize: '0.8rem',
                 fontWeight: 600,
                 color: 'var(--text-secondary)',
                 textTransform: 'uppercase',
               }}
             >
-              Frontend Status
+              Frontend
             </span>
             <span className="badge badge-connected">
               <span className="dot-indicator" /> Running
             </span>
           </div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+          <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
             Frontend is running.
           </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-            React 19 + Vite + TypeScript + Apollo Client
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.35rem' }}>
+            React 19 &bull; Vite &bull; TypeScript
           </p>
         </div>
 
@@ -101,18 +99,18 @@ export const DashboardPage: React.FC = () => {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '1rem',
+              marginBottom: '0.75rem',
             }}
           >
             <span
               style={{
-                fontSize: '0.875rem',
+                fontSize: '0.8rem',
                 fontWeight: 600,
                 color: 'var(--text-secondary)',
                 textTransform: 'uppercase',
               }}
             >
-              Backend API Status
+              Backend API
             </span>
             {loading && !data ? (
               <span className="badge badge-warning">
@@ -128,10 +126,17 @@ export const DashboardPage: React.FC = () => {
               </span>
             )}
           </div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+          <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
             API: {loading && !data ? 'Checking...' : isApiConnected ? 'Connected' : 'Not Connected'}
           </div>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', wordBreak: 'break-all' }}>
+          <div
+            style={{
+              color: 'var(--text-muted)',
+              fontSize: '0.8rem',
+              marginTop: '0.35rem',
+              wordBreak: 'break-all',
+            }}
+          >
             Target: <code>{API_URL}</code>
           </div>
         </div>
@@ -143,18 +148,18 @@ export const DashboardPage: React.FC = () => {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '1rem',
+              marginBottom: '0.75rem',
             }}
           >
             <span
               style={{
-                fontSize: '0.875rem',
+                fontSize: '0.8rem',
                 fontWeight: 600,
                 color: 'var(--text-secondary)',
                 textTransform: 'uppercase',
               }}
             >
-              Database Status
+              Database
             </span>
             {loading && !data ? (
               <span className="badge badge-warning">
@@ -170,7 +175,7 @@ export const DashboardPage: React.FC = () => {
               </span>
             )}
           </div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+          <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
             PostgreSQL:{' '}
             {loading && !data
               ? 'Checking...'
@@ -180,40 +185,42 @@ export const DashboardPage: React.FC = () => {
                   ? 'Disconnected'
                   : 'Unavailable'}
           </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Prisma ORM Connection</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.35rem' }}>
+            Prisma ORM Connection
+          </p>
         </div>
       </div>
 
-      {/* Detailed Diagnostic & Diagnostic Info */}
+      {/* Diagnostics */}
       <div className="card">
         <h3
           style={{
-            fontSize: '1.1rem',
+            fontSize: '1rem',
             fontWeight: 600,
-            marginBottom: '1rem',
+            marginBottom: '0.85rem',
             borderBottom: '1px solid var(--border-color)',
             paddingBottom: '0.5rem',
           }}
         >
-          Infrastructure Diagnostics
+          Infrastructure Status
         </h3>
 
         {loading && !data ? (
-          <LoadingSpinner message="Polling backend health endpoint..." />
+          <LoadingSpinner message="Checking backend health..." />
         ) : (
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
               gap: '1rem',
             }}
           >
             <div>
               <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                GraphQL Health Query
+                GraphQL Health
               </div>
-              <div style={{ fontWeight: 600, marginTop: '0.25rem' }}>
-                <code>query &#123; health &#125;</code> &rarr;{' '}
+              <div style={{ fontWeight: 600, marginTop: '0.2rem', fontSize: '0.9rem' }}>
+                <code>health</code> &rarr;{' '}
                 <span
                   style={{
                     color: isApiConnected
@@ -228,25 +235,23 @@ export const DashboardPage: React.FC = () => {
 
             <div>
               <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Environment</div>
-              <div style={{ fontWeight: 600, marginTop: '0.25rem' }}>
+              <div style={{ fontWeight: 600, marginTop: '0.2rem', fontSize: '0.9rem' }}>
                 {healthStatus?.environment || import.meta.env.MODE}
               </div>
             </div>
 
             <div>
               <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                API Process Uptime
+                Process Uptime
               </div>
-              <div style={{ fontWeight: 600, marginTop: '0.25rem' }}>
+              <div style={{ fontWeight: 600, marginTop: '0.2rem', fontSize: '0.9rem' }}>
                 {healthStatus?.uptime !== undefined ? `${healthStatus.uptime.toFixed(1)}s` : 'N/A'}
               </div>
             </div>
 
             <div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-                Last Health Check
-              </div>
-              <div style={{ fontWeight: 600, marginTop: '0.25rem', fontSize: '0.85rem' }}>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Last Checked</div>
+              <div style={{ fontWeight: 600, marginTop: '0.2rem', fontSize: '0.85rem' }}>
                 {healthStatus?.timestamp
                   ? new Date(healthStatus.timestamp).toLocaleTimeString()
                   : 'N/A'}
@@ -258,8 +263,8 @@ export const DashboardPage: React.FC = () => {
         {error && (
           <div
             style={{
-              marginTop: '1.25rem',
-              padding: '0.85rem',
+              marginTop: '1rem',
+              padding: '0.75rem',
               backgroundColor: 'var(--status-error-bg)',
               border: '1px solid var(--status-error-border)',
               borderRadius: 'var(--radius-sm)',
@@ -267,85 +272,9 @@ export const DashboardPage: React.FC = () => {
               fontSize: '0.85rem',
             }}
           >
-            <strong>Connection notice:</strong> Could not reach backend GraphQL endpoint at{' '}
-            <code>{API_URL}</code>. Ensure the API server is running with <code>pnpm dev</code> or
-            Docker.
+            Could not reach backend GraphQL endpoint at <code>{API_URL}</code>.
           </div>
         )}
-      </div>
-
-      {/* Architecture Readiness Card */}
-      <div className="card" style={{ borderColor: 'var(--border-subtle)' }}>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.75rem' }}>
-          Foundation Roadmap Readiness
-        </h3>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-          The foundation layer is initialized with clean modular separation for future capability
-          phases:
-        </p>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '0.75rem',
-            fontSize: '0.85rem',
-          }}
-        >
-          <div
-            style={{
-              padding: '0.6rem',
-              background: 'var(--bg-primary)',
-              borderRadius: 'var(--radius-sm)',
-            }}
-          >
-            &bull; Phase 1: Release checklist
-          </div>
-          <div
-            style={{
-              padding: '0.6rem',
-              background: 'var(--bg-primary)',
-              borderRadius: 'var(--radius-sm)',
-            }}
-          >
-            &bull; Phase 2: Projects
-          </div>
-          <div
-            style={{
-              padding: '0.6rem',
-              background: 'var(--bg-primary)',
-              borderRadius: 'var(--radius-sm)',
-            }}
-          >
-            &bull; Phase 3: Organizations
-          </div>
-          <div
-            style={{
-              padding: '0.6rem',
-              background: 'var(--bg-primary)',
-              borderRadius: 'var(--radius-sm)',
-            }}
-          >
-            &bull; Phase 4: Users & Memberships
-          </div>
-          <div
-            style={{
-              padding: '0.6rem',
-              background: 'var(--bg-primary)',
-              borderRadius: 'var(--radius-sm)',
-            }}
-          >
-            &bull; Phase 5: RBAC & Permissions
-          </div>
-          <div
-            style={{
-              padding: '0.6rem',
-              background: 'var(--bg-primary)',
-              borderRadius: 'var(--radius-sm)',
-            }}
-          >
-            &bull; Phase 6: ABAC Policy Engine
-          </div>
-        </div>
       </div>
     </div>
   );

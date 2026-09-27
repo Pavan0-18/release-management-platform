@@ -9,10 +9,10 @@ export const ProgressBar: React.FC<Props> = ({ percentage, showText = true }) =>
   const clamped = Math.min(Math.max(percentage, 0), 100);
 
   const getColor = (p: number) => {
-    if (p === 100) return '#10b981';
-    if (p > 50) return '#3b82f6';
-    if (p > 0) return '#f59e0b';
-    return '#6b7280';
+    if (p === 100) return '#059669';
+    if (p > 50) return '#2563eb';
+    if (p > 0) return '#d97706';
+    return '#94a3b8';
   };
 
   return (
@@ -20,8 +20,8 @@ export const ProgressBar: React.FC<Props> = ({ percentage, showText = true }) =>
       <div
         style={{
           flex: 1,
-          height: '8px',
-          backgroundColor: '#374151',
+          height: '6px',
+          backgroundColor: '#e2e8f0',
           borderRadius: '9999px',
           overflow: 'hidden',
         }}
@@ -42,7 +42,7 @@ export const ProgressBar: React.FC<Props> = ({ percentage, showText = true }) =>
             fontSize: '0.75rem',
             fontWeight: 600,
             color: 'var(--text-secondary)',
-            minWidth: '40px',
+            minWidth: '36px',
           }}
         >
           {clamped.toFixed(0)}%
