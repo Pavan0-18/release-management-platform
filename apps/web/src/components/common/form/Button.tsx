@@ -66,15 +66,29 @@ export const Button: React.FC<ButtonProps> = ({
   const getSizeStyles = (): React.CSSProperties => {
     switch (size) {
       case 'sm':
-        return { padding: '0.35rem 0.75rem', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' };
+        return {
+          padding: '0.2rem 0.65rem',
+          fontSize: '0.75rem',
+          borderRadius: 'var(--radius-sm)',
+          height: '30px',
+          boxSizing: 'border-box',
+        };
       case 'lg':
-        return { padding: '0.75rem 1.5rem', fontSize: '1rem', borderRadius: 'var(--radius-md)' };
+        return {
+          padding: '0.6rem 1.25rem',
+          fontSize: '0.95rem',
+          borderRadius: 'var(--radius-md)',
+          height: '42px',
+          boxSizing: 'border-box',
+        };
       case 'md':
       default:
         return {
-          padding: '0.55rem 1.15rem',
-          fontSize: '0.875rem',
+          padding: '0.35rem 0.85rem',
+          fontSize: '0.825rem',
           borderRadius: 'var(--radius-sm)',
+          height: '36px',
+          boxSizing: 'border-box',
         };
     }
   };
@@ -83,7 +97,7 @@ export const Button: React.FC<ButtonProps> = ({
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '0.45rem',
+    gap: '0.4rem',
     fontWeight: 600,
     cursor: disabled || loading ? 'not-allowed' : 'pointer',
     opacity: disabled || loading ? 0.6 : 1,
@@ -91,6 +105,7 @@ export const Button: React.FC<ButtonProps> = ({
     textDecoration: 'none',
     width: fullWidth ? '100%' : 'auto',
     userSelect: 'none',
+    boxSizing: 'border-box',
     ...getVariantStyles(),
     ...getSizeStyles(),
     ...style,
@@ -106,8 +121,8 @@ export const Button: React.FC<ButtonProps> = ({
       {loading && (
         <span
           style={{
-            width: '14px',
-            height: '14px',
+            width: '12px',
+            height: '12px',
             border: '2px solid currentColor',
             borderTopColor: 'transparent',
             borderRadius: '50%',

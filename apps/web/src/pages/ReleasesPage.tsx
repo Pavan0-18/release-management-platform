@@ -9,7 +9,6 @@ import { CreateProjectModal } from '../components/projects/CreateProjectModal';
 import { ManageServicesModal } from '../components/projects/ManageServicesModal';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { Input, Button } from '../components/common/form';
-import { Tooltip } from '../components/common/Tooltip';
 
 export const ReleasesPage: React.FC = () => {
   const { projectId } = useParams<{ projectId?: string }>();
@@ -121,70 +120,53 @@ export const ReleasesPage: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <Tooltip content={`Project Key: ${currentProject.key}`} position="bottom">
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  backgroundColor: 'var(--accent-primary)',
-                  color: '#ffffff',
-                  padding: '0.15rem 0.45rem',
-                  borderRadius: '4px',
-                  letterSpacing: '0.02em',
-                }}
-              >
-                {currentProject.key}
-              </span>
-            </Tooltip>
+            <span
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                backgroundColor: 'var(--accent-primary)',
+                color: '#ffffff',
+                padding: '0.15rem 0.45rem',
+                borderRadius: '4px',
+                letterSpacing: '0.02em',
+              }}
+            >
+              {currentProject.key}
+            </span>
             <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               {currentProject.name}
             </h2>
-            <Tooltip
-              content={
-                isMicroservices
-                  ? `Microservices architecture (${projectServices.length} services configured)`
-                  : 'Monolithic single-repo project'
-              }
-              position="bottom"
+            <span
+              style={{
+                fontSize: '0.65rem',
+                fontWeight: 600,
+                padding: '0.1rem 0.45rem',
+                borderRadius: '999px',
+                backgroundColor: isMicroservices ? '#e0f2fe' : '#f5f5f4',
+                color: isMicroservices ? '#0369a1' : '#57534e',
+              }}
             >
-              <span
-                style={{
-                  fontSize: '0.65rem',
-                  fontWeight: 600,
-                  padding: '0.1rem 0.45rem',
-                  borderRadius: '999px',
-                  backgroundColor: isMicroservices ? '#e0f2fe' : '#f5f5f4',
-                  color: isMicroservices ? '#0369a1' : '#57534e',
-                }}
-              >
-                {isMicroservices ? `Microservices (${projectServices.length})` : 'Monolith'}
-              </span>
-            </Tooltip>
+              {isMicroservices ? `Microservices (${projectServices.length})` : 'Monolith'}
+            </span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {isMicroservices && (
-              <Tooltip content="Add or configure microservices for this project" position="bottom">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setIsManageServicesOpen(true)}
-                  style={{ height: '36px', fontSize: '0.8rem' }}
-                >
-                  ⚙️ Services
-                </Button>
-              </Tooltip>
-            )}
-            <Tooltip content="Plan and create a new release version" position="bottom">
               <Button
-                variant="primary"
+                variant="secondary"
                 size="sm"
-                onClick={() => setIsCreateReleaseOpen(true)}
-                style={{ height: '36px', fontSize: '0.8rem' }}
+                onClick={() => setIsManageServicesOpen(true)}
               >
-                + New Release
+                ⚙️ Services
               </Button>
-            </Tooltip>
+            )}
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setIsCreateReleaseOpen(true)}
+            >
+              + New Release
+            </Button>
           </div>
         </div>
       )}
@@ -239,131 +221,121 @@ export const ReleasesPage: React.FC = () => {
             Status:
           </span>
 
-          <Tooltip content="Show all releases" position="top">
-            <button
-              type="button"
-              onClick={() => setStatusFilter('')}
-              style={{
-                padding: '0.2rem 0.5rem',
-                borderRadius: '999px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                border:
-                  statusFilter === ''
-                    ? '1.5px solid var(--accent-primary)'
-                    : '1px solid var(--border-color)',
-                backgroundColor: statusFilter === '' ? 'var(--accent-light)' : 'transparent',
-                color: statusFilter === '' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                transition: 'all 0.15s ease',
-                height: '28px',
-              }}
-            >
-              All ({totalCount})
-            </button>
-          </Tooltip>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('')}
+            style={{
+              padding: '0.2rem 0.5rem',
+              borderRadius: '999px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              border:
+                statusFilter === ''
+                  ? '1.5px solid var(--accent-primary)'
+                  : '1px solid var(--border-color)',
+              backgroundColor: statusFilter === '' ? 'var(--accent-light)' : 'transparent',
+              color: statusFilter === '' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+              transition: 'all 0.15s ease',
+              height: '28px',
+            }}
+          >
+            All ({totalCount})
+          </button>
 
-          <Tooltip content="Releases currently undergoing checklist verification" position="top">
-            <button
-              type="button"
-              onClick={() => setStatusFilter(ReleaseStatus.IN_PROGRESS)}
-              style={{
-                padding: '0.2rem 0.5rem',
-                borderRadius: '999px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                border:
-                  statusFilter === ReleaseStatus.IN_PROGRESS
-                    ? '1.5px solid #b45309'
-                    : '1px solid var(--border-color)',
-                backgroundColor:
-                  statusFilter === ReleaseStatus.IN_PROGRESS ? '#fffbeb' : 'transparent',
-                color:
-                  statusFilter === ReleaseStatus.IN_PROGRESS ? '#b45309' : 'var(--text-secondary)',
-                transition: 'all 0.15s ease',
-                height: '28px',
-              }}
-            >
-              In Progress ({inProgressCount})
-            </button>
-          </Tooltip>
+          <button
+            type="button"
+            onClick={() => setStatusFilter(ReleaseStatus.IN_PROGRESS)}
+            style={{
+              padding: '0.2rem 0.5rem',
+              borderRadius: '999px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              border:
+                statusFilter === ReleaseStatus.IN_PROGRESS
+                  ? '1.5px solid #b45309'
+                  : '1px solid var(--border-color)',
+              backgroundColor:
+                statusFilter === ReleaseStatus.IN_PROGRESS ? '#fffbeb' : 'transparent',
+              color:
+                statusFilter === ReleaseStatus.IN_PROGRESS ? '#b45309' : 'var(--text-secondary)',
+              transition: 'all 0.15s ease',
+              height: '28px',
+            }}
+          >
+            In Progress ({inProgressCount})
+          </button>
 
-          <Tooltip content="All gates passed; approved for deployment" position="top">
-            <button
-              type="button"
-              onClick={() => setStatusFilter(ReleaseStatus.READY_FOR_DEPLOYMENT)}
-              style={{
-                padding: '0.2rem 0.5rem',
-                borderRadius: '999px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                border:
-                  statusFilter === ReleaseStatus.READY_FOR_DEPLOYMENT
-                    ? '1.5px solid #2563eb'
-                    : '1px solid var(--border-color)',
-                backgroundColor:
-                  statusFilter === ReleaseStatus.READY_FOR_DEPLOYMENT ? '#eff6ff' : 'transparent',
-                color:
-                  statusFilter === ReleaseStatus.READY_FOR_DEPLOYMENT
-                    ? '#1d4ed8'
-                    : 'var(--text-secondary)',
-                transition: 'all 0.15s ease',
-                height: '28px',
-              }}
-            >
-              Ready ({readyCount})
-            </button>
-          </Tooltip>
+          <button
+            type="button"
+            onClick={() => setStatusFilter(ReleaseStatus.READY_FOR_DEPLOYMENT)}
+            style={{
+              padding: '0.2rem 0.5rem',
+              borderRadius: '999px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              border:
+                statusFilter === ReleaseStatus.READY_FOR_DEPLOYMENT
+                  ? '1.5px solid #2563eb'
+                  : '1px solid var(--border-color)',
+              backgroundColor:
+                statusFilter === ReleaseStatus.READY_FOR_DEPLOYMENT ? '#eff6ff' : 'transparent',
+              color:
+                statusFilter === ReleaseStatus.READY_FOR_DEPLOYMENT
+                  ? '#1d4ed8'
+                  : 'var(--text-secondary)',
+              transition: 'all 0.15s ease',
+              height: '28px',
+            }}
+          >
+            Ready ({readyCount})
+          </button>
 
-          <Tooltip content="Successfully deployed to production" position="top">
-            <button
-              type="button"
-              onClick={() => setStatusFilter(ReleaseStatus.DEPLOYED)}
-              style={{
-                padding: '0.2rem 0.5rem',
-                borderRadius: '999px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                border:
-                  statusFilter === ReleaseStatus.DEPLOYED
-                    ? '1.5px solid #16a34a'
-                    : '1px solid var(--border-color)',
-                backgroundColor: statusFilter === ReleaseStatus.DEPLOYED ? '#f0fdf4' : 'transparent',
-                color: statusFilter === ReleaseStatus.DEPLOYED ? '#15803d' : 'var(--text-secondary)',
-                transition: 'all 0.15s ease',
-                height: '28px',
-              }}
-            >
-              Deployed ({deployedCount})
-            </button>
-          </Tooltip>
+          <button
+            type="button"
+            onClick={() => setStatusFilter(ReleaseStatus.DEPLOYED)}
+            style={{
+              padding: '0.2rem 0.5rem',
+              borderRadius: '999px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              border:
+                statusFilter === ReleaseStatus.DEPLOYED
+                  ? '1.5px solid #16a34a'
+                  : '1px solid var(--border-color)',
+              backgroundColor: statusFilter === ReleaseStatus.DEPLOYED ? '#f0fdf4' : 'transparent',
+              color: statusFilter === ReleaseStatus.DEPLOYED ? '#15803d' : 'var(--text-secondary)',
+              transition: 'all 0.15s ease',
+              height: '28px',
+            }}
+          >
+            Deployed ({deployedCount})
+          </button>
 
-          <Tooltip content="Draft releases in initial planning phase" position="top">
-            <button
-              type="button"
-              onClick={() => setStatusFilter(ReleaseStatus.DRAFT)}
-              style={{
-                padding: '0.2rem 0.5rem',
-                borderRadius: '999px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                border:
-                  statusFilter === ReleaseStatus.DRAFT
-                    ? '1.5px solid #78716c'
-                    : '1px solid var(--border-color)',
-                backgroundColor: statusFilter === ReleaseStatus.DRAFT ? '#f5f5f4' : 'transparent',
-                color: statusFilter === ReleaseStatus.DRAFT ? '#44403c' : 'var(--text-secondary)',
-                transition: 'all 0.15s ease',
-                height: '28px',
-              }}
-            >
-              Drafts ({draftCount})
-            </button>
-          </Tooltip>
+          <button
+            type="button"
+            onClick={() => setStatusFilter(ReleaseStatus.DRAFT)}
+            style={{
+              padding: '0.2rem 0.5rem',
+              borderRadius: '999px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              border:
+                statusFilter === ReleaseStatus.DRAFT
+                  ? '1.5px solid #78716c'
+                  : '1px solid var(--border-color)',
+              backgroundColor: statusFilter === ReleaseStatus.DRAFT ? '#f5f5f4' : 'transparent',
+              color: statusFilter === ReleaseStatus.DRAFT ? '#44403c' : 'var(--text-secondary)',
+              transition: 'all 0.15s ease',
+              height: '28px',
+            }}
+          >
+            Drafts ({draftCount})
+          </button>
         </div>
       </section>
 
@@ -373,44 +345,41 @@ export const ReleasesPage: React.FC = () => {
           <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
             Service:
           </span>
-          <Tooltip content="Show releases across all services" position="top">
+          <button
+            type="button"
+            onClick={() => setServiceFilter('')}
+            style={{
+              padding: '0.15rem 0.5rem',
+              borderRadius: '4px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              border: serviceFilter === '' ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
+              backgroundColor: serviceFilter === '' ? 'var(--accent-light)' : '#ffffff',
+              color: serviceFilter === '' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            }}
+          >
+            All
+          </button>
+          {projectServices.map((svc) => (
             <button
+              key={svc}
               type="button"
-              onClick={() => setServiceFilter('')}
+              onClick={() => setServiceFilter(svc)}
               style={{
                 padding: '0.15rem 0.5rem',
                 borderRadius: '4px',
                 fontSize: '0.75rem',
                 fontWeight: 600,
                 cursor: 'pointer',
-                border: serviceFilter === '' ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                backgroundColor: serviceFilter === '' ? 'var(--accent-light)' : '#ffffff',
-                color: serviceFilter === '' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                fontFamily: 'monospace',
+                border: serviceFilter === svc ? '1px solid #0369a1' : '1px solid var(--border-color)',
+                backgroundColor: serviceFilter === svc ? '#e0f2fe' : '#ffffff',
+                color: serviceFilter === svc ? '#0369a1' : 'var(--text-secondary)',
               }}
             >
-              All
+              {svc}
             </button>
-          </Tooltip>
-          {projectServices.map((svc) => (
-            <Tooltip key={svc} content={`Filter releases for service: ${svc}`} position="top">
-              <button
-                type="button"
-                onClick={() => setServiceFilter(svc)}
-                style={{
-                  padding: '0.15rem 0.5rem',
-                  borderRadius: '4px',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontFamily: 'monospace',
-                  border: serviceFilter === svc ? '1px solid #0369a1' : '1px solid var(--border-color)',
-                  backgroundColor: serviceFilter === svc ? '#e0f2fe' : '#ffffff',
-                  color: serviceFilter === svc ? '#0369a1' : 'var(--text-secondary)',
-                }}
-              >
-                {svc}
-              </button>
-            </Tooltip>
           ))}
         </div>
       )}
@@ -463,38 +432,34 @@ export const ReleasesPage: React.FC = () => {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
-                <Tooltip content={`Version: ${release.version}`} position="right">
-                  <span
-                    style={{
-                      fontFamily: 'monospace',
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
-                      color: 'var(--accent-primary)',
-                      backgroundColor: '#ede5dc',
-                      padding: '0.15rem 0.4rem',
-                      borderRadius: '4px',
-                    }}
-                  >
-                    {release.version}
-                  </span>
-                </Tooltip>
+                <span
+                  style={{
+                    fontFamily: 'monospace',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    color: 'var(--accent-primary)',
+                    backgroundColor: '#ede5dc',
+                    padding: '0.15rem 0.4rem',
+                    borderRadius: '4px',
+                  }}
+                >
+                  {release.version}
+                </span>
 
                 {release.serviceName && (
-                  <Tooltip content={`Microservice: ${release.serviceName}`} position="right">
-                    <span
-                      style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        padding: '0.1rem 0.4rem',
-                        borderRadius: '4px',
-                        backgroundColor: '#e0f2fe',
-                        color: '#0369a1',
-                        fontFamily: 'monospace',
-                      }}
-                    >
-                      {release.serviceName}
-                    </span>
-                  </Tooltip>
+                  <span
+                    style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      padding: '0.1rem 0.4rem',
+                      borderRadius: '4px',
+                      backgroundColor: '#e0f2fe',
+                      color: '#0369a1',
+                      fontFamily: 'monospace',
+                    }}
+                  >
+                    {release.serviceName}
+                  </span>
                 )}
 
                 <span
@@ -512,11 +477,9 @@ export const ReleasesPage: React.FC = () => {
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexShrink: 0 }}>
-                <Tooltip content={`${release.completedSteps} of ${release.totalSteps} checklist gates verified`} position="left">
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-                    Gates: {release.completedSteps}/{release.totalSteps}
-                  </span>
-                </Tooltip>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                  Gates: {release.completedSteps}/{release.totalSteps}
+                </span>
                 <ReleaseStatusBadge status={release.status} />
               </div>
             </Link>

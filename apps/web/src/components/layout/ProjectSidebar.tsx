@@ -69,16 +69,14 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
           Release Hub
         </h1>
 
-        <Tooltip content="Create a new project" position="bottom">
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setIsCreateOpen(true)}
-            style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', height: '30px' }}
-          >
-            + Project
-          </Button>
-        </Tooltip>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setIsCreateOpen(true)}
+          style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', height: '30px' }}
+        >
+          + Project
+        </Button>
       </div>
 
       {/* Project Search Field */}
@@ -167,16 +165,18 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
                   boxSizing: 'border-box',
                 }}
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.45rem',
-                    minWidth: 0,
-                    flex: 1,
-                  }}
-                >
-                  <Tooltip content={`Key: ${project.key}`} position="right">
+                {/* Project Key & Name with Tooltip */}
+                <Tooltip content={`Project: [${project.key}] ${project.name}`} position="right">
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      minWidth: 0,
+                      flex: 1,
+                      overflow: 'hidden',
+                    }}
+                  >
                     <span
                       style={{
                         fontSize: '0.65rem',
@@ -191,24 +191,24 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
                     >
                       {project.key}
                     </span>
-                  </Tooltip>
-                  <span
-                    style={{
-                      fontWeight: isProjectActive ? 700 : 500,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      fontSize: '0.85rem',
-                    }}
-                    title={project.name}
-                  >
-                    {project.name}
-                  </span>
-                </div>
+                    <span
+                      style={{
+                        fontWeight: isProjectActive ? 700 : 500,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        fontSize: '0.85rem',
+                      }}
+                    >
+                      {project.name}
+                    </span>
+                  </div>
+                </Tooltip>
 
+                {/* Project Type Badge with Tooltip */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
-                  {isMicroservices && (
-                    <Tooltip content={`Microservices (${serviceCount} services)`} position="left">
+                  {isMicroservices ? (
+                    <Tooltip content={`Project Type: Microservices (${serviceCount} services)`} position="left">
                       <span
                         style={{
                           fontSize: '0.6rem',
@@ -217,26 +217,42 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
                           backgroundColor: '#e0f2fe',
                           padding: '0.05rem 0.3rem',
                           borderRadius: '3px',
+                          cursor: 'default',
                         }}
                       >
                         MS
                       </span>
                     </Tooltip>
+                  ) : (
+                    <Tooltip content="Project Type: Monolith (Single repository)" position="left">
+                      <span
+                        style={{
+                          fontSize: '0.6rem',
+                          fontWeight: 700,
+                          color: '#57534e',
+                          backgroundColor: '#f5f5f4',
+                          padding: '0.05rem 0.3rem',
+                          borderRadius: '3px',
+                          cursor: 'default',
+                        }}
+                      >
+                        MN
+                      </span>
+                    </Tooltip>
                   )}
-                  <Tooltip content={`${project.totalReleases || 0} releases`} position="left">
-                    <span
-                      style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 600,
-                        color: isProjectActive ? 'var(--accent-primary)' : 'var(--text-muted)',
-                        backgroundColor: isProjectActive ? '#ffffff' : '#f5f0eb',
-                        padding: '0.05rem 0.4rem',
-                        borderRadius: '999px',
-                      }}
-                    >
-                      {project.totalReleases || 0}
-                    </span>
-                  </Tooltip>
+
+                  <span
+                    style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 600,
+                      color: isProjectActive ? 'var(--accent-primary)' : 'var(--text-muted)',
+                      backgroundColor: isProjectActive ? '#ffffff' : '#f5f0eb',
+                      padding: '0.05rem 0.4rem',
+                      borderRadius: '999px',
+                    }}
+                  >
+                    {project.totalReleases || 0}
+                  </span>
                 </div>
               </NavLink>
             );
