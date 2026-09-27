@@ -2,22 +2,23 @@
   "name": "@rmp/shared",
   "version": "0.1.0",
   "private": true,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "default": "./dist/esm/index.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "rimraf dist && tsc -p tsconfig.cjs.json && tsc -p tsconfig.esm.json",
+    "dev": "tsc -p tsconfig.esm.json --watch",
     "lint": "eslint src",
     "test": "node -e \"console.log('@rmp/shared smoke test passed')\"",
     "clean": "rimraf dist"

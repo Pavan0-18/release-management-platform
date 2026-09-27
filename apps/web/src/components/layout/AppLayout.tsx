@@ -1,41 +1,71 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { ProjectSidebar } from './ProjectSidebar';
 
 export const AppLayout: React.FC = () => {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        minHeight: '100vh',
-        height: '100vh',
-        overflow: 'hidden',
-        backgroundColor: 'var(--bg-primary)',
-      }}
-    >
-      {/* Full-Height Left Sidebar */}
-      <ProjectSidebar />
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const location = useLocation();
 
-      {/* Right Main Scrollable Viewport */}
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [location.pathname]);
+
+  return (
+    <div className="app-layout-root">
+      {/* Mobile Backdrop Overlay */}
       <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          minWidth: 0,
-          height: '100vh',
-          overflowY: 'auto',
-        }}
-      >
-        <main
-          style={{
-            flex: 1,
-            padding: '1.5rem 2rem',
-            maxWidth: '1200px',
-            width: '100%',
-            margin: '0 auto',
-          }}
-        >
+        className={`sidebar-backdrop ${isMobileOpen ? 'active' : ''}`}
+        onClick={() => setIsMobileOpen(false)}
+      />
+
+      {/* Left Sidebar (Sticky on Desktop, Drawer on Mobile) */}
+      <ProjectSidebar
+        isMobileOpen={isMobileOpen}
+        onCloseMobile={() => setIsMobileOpen(false)}
+      />
+
+      {/* Main Viewport */}
+      <div className="app-main-viewport">
+        {/* Mobile Header Bar with Hamburger Button */}
+        <header className="mobile-top-bar">
+          <button
+            type="button"
+            onClick={() => setIsMobileOpen(!isMobileOpen)}
+            style={{
+              background: 'none',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '0.4rem 0.65rem',
+              fontSize: '1.1rem',
+              cursor: 'pointer',
+              color: 'var(--accent-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            aria-label="Toggle Project Navigation"
+          >
+            ☰
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <span
+              style={{
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+              }}
+            >
+              Release Hub
+            </span>
+          </div>
+
+          <div style={{ width: '36px' }} /> {/* Spacer for symmetry */}
+        </header>
+
+        {/* Dynamic Route Content */}
+        <main className="app-main-content">
           <Outlet />
         </main>
       </div>
