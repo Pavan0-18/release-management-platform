@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ReleaseStatus, ProjectNature } from '@rmp/shared';
-import { useReleases } from '../hooks/useReleases';
+import { Release, ReleaseStatus, ProjectNature } from '@rmp/shared';
+import { useReleases, useDeleteRelease } from '../hooks/useReleases';
 import { useProject, useProjects } from '../hooks/useProjects';
 import { CreateReleaseModal } from '../components/releases/CreateReleaseModal';
+import { EditReleaseModal } from '../components/releases/EditReleaseModal';
 import { CreateProjectModal } from '../components/projects/CreateProjectModal';
 import { ManageServicesModal } from '../components/projects/ManageServicesModal';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
@@ -18,8 +19,11 @@ export const ReleasesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const [isCreateReleaseOpen, setIsCreateReleaseOpen] = useState(false);
+  const [editingRelease, setEditingRelease] = useState<Release | null>(null);
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
   const [isManageServicesOpen, setIsManageServicesOpen] = useState(false);
+
+  const deleteReleaseMutation = useDeleteRelease();
 
   const { data: allProjects = [], isLoading: isLoadingProjects } = useProjects();
   const activeProjectId = projectId || (allProjects.length > 0 ? allProjects[0].id : undefined);
@@ -592,11 +596,91 @@ export const ReleasesPage: React.FC = () => {
                   >
                     {formatStatus(release.status)}
                   </span>
+
+                  {/* Edit & Delete Action Icon Buttons */}
+                  <div
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setEditingRelease(release);
+                      }}
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0.2rem 0.45rem',
+                        fontSize: '0.8rem',
+                        cursor: 'pointer',
+                        color: 'var(--text-primary)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        lineHeight: 1,
+                        transition: 'all 0.15s ease',
+                      }}
+                      title="Edit Release Details"
+                      aria-label="Edit Release Details"
+                    >
+                      ✏️
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={deleteReleaseMutation.isPending}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (
+                          window.confirm(
+                            `Are you sure you want to delete release "${release.name}" (${release.version})?`,
+                          )
+                        ) {
+                          deleteReleaseMutation.mutate(release.id);
+                        }
+                      }}
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0.2rem 0.45rem',
+                        fontSize: '0.8rem',
+                        cursor: deleteReleaseMutation.isPending ? 'not-allowed' : 'pointer',
+                        color: '#dc2626',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        lineHeight: 1,
+                        transition: 'all 0.15s ease',
+                        opacity: deleteReleaseMutation.isPending ? 0.5 : 1,
+                      }}
+                      title="Delete Release"
+                      aria-label="Delete Release"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </div>
               </Link>
             );
           })}
         </div>
+      )}
+
+      {/* Edit Release Modal */}
+      {editingRelease && (
+        <EditReleaseModal
+          isOpen={Boolean(editingRelease)}
+          onClose={() => setEditingRelease(null)}
+          release={editingRelease}
+        />
       )}
 
       {/* Create Release Modal */}

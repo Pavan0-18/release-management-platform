@@ -27,6 +27,28 @@ import { ReleasesModule } from './releases/releases.module';
         playground: configService.get<boolean>('graphql.playground', true),
         introspection: true,
         context: ({ req, res }: { req: unknown; res: unknown }) => ({ req, res }),
+        formatError: (error) => {
+          const originalError = error.extensions?.originalError as any;
+          const message = Array.isArray(originalError?.message)
+            ? originalError.message.join(', ')
+            : originalError?.message || error.message || 'An unexpected error occurred';
+
+          return {
+            message,
+            code:
+              error.extensions?.code ||
+              (originalError?.statusCode === 400
+                ? 'BAD_USER_INPUT'
+                : originalError?.statusCode === 404
+                  ? 'NOT_FOUND'
+                  : originalError?.statusCode === 409
+                    ? 'CONFLICT'
+                    : 'INTERNAL_SERVER_ERROR'),
+            statusCode: originalError?.statusCode || 500,
+            locations: error.locations,
+            path: error.path,
+          };
+        },
       }),
     }),
     PrismaModule,
