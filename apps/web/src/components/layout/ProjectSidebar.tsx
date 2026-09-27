@@ -79,40 +79,15 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setIsCreateOpen(true)}
-            style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', height: '32px' }}
-            title="Create New Project"
-          >
-            + Project
-          </Button>
-
-          {/* Close drawer button for mobile screens */}
-          {onCloseMobile && (
-            <button
-              type="button"
-              onClick={onCloseMobile}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontSize: '1.25rem',
-                cursor: 'pointer',
-                color: 'var(--text-muted)',
-                padding: '0.25rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '4px',
-              }}
-              title="Close Navigation"
-            >
-              ✕
-            </button>
-          )}
-        </div>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setIsCreateOpen(true)}
+          style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', height: '32px' }}
+          title="Create New Project"
+        >
+          + Project
+        </Button>
       </div>
 
       {/* Project Search Field */}
