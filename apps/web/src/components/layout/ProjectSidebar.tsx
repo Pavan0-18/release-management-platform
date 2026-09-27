@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { ProjectNature } from '@rmp/shared';
 import { useProjects } from '../../hooks/useProjects';
 import { Input, Button } from '../common/form';
+import { Tooltip } from '../common/Tooltip';
 import { CreateProjectModal } from '../projects/CreateProjectModal';
 
 interface ProjectSidebarProps {
@@ -68,15 +69,16 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
           Release Hub
         </h1>
 
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => setIsCreateOpen(true)}
-          style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', height: '30px' }}
-          title="Create New Project"
-        >
-          + Project
-        </Button>
+        <Tooltip content="Create a new project" position="bottom">
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setIsCreateOpen(true)}
+            style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', height: '30px' }}
+          >
+            + Project
+          </Button>
+        </Tooltip>
       </div>
 
       {/* Project Search Field */}
@@ -136,6 +138,7 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
           filteredProjects.map((project) => {
             const isProjectActive = location.pathname.includes(`/projects/${project.id}`);
             const isMicroservices = project.nature === ProjectNature.MICROSERVICES;
+            const serviceCount = project.services?.length || 0;
 
             return (
               <NavLink
@@ -173,20 +176,22 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
                     flex: 1,
                   }}
                 >
-                  <span
-                    style={{
-                      fontSize: '0.65rem',
-                      fontWeight: 700,
-                      backgroundColor: isProjectActive ? 'var(--accent-primary)' : '#ede5dc',
-                      color: isProjectActive ? '#ffffff' : 'var(--accent-primary)',
-                      padding: '0.12rem 0.35rem',
-                      borderRadius: '3px',
-                      letterSpacing: '0.02em',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {project.key}
-                  </span>
+                  <Tooltip content={`Key: ${project.key}`} position="right">
+                    <span
+                      style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        backgroundColor: isProjectActive ? 'var(--accent-primary)' : '#ede5dc',
+                        color: isProjectActive ? '#ffffff' : 'var(--accent-primary)',
+                        padding: '0.12rem 0.35rem',
+                        borderRadius: '3px',
+                        letterSpacing: '0.02em',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {project.key}
+                    </span>
+                  </Tooltip>
                   <span
                     style={{
                       fontWeight: isProjectActive ? 700 : 500,
@@ -203,32 +208,35 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
                   {isMicroservices && (
+                    <Tooltip content={`Microservices (${serviceCount} services)`} position="left">
+                      <span
+                        style={{
+                          fontSize: '0.6rem',
+                          fontWeight: 700,
+                          color: '#0369a1',
+                          backgroundColor: '#e0f2fe',
+                          padding: '0.05rem 0.3rem',
+                          borderRadius: '3px',
+                        }}
+                      >
+                        MS
+                      </span>
+                    </Tooltip>
+                  )}
+                  <Tooltip content={`${project.totalReleases || 0} releases`} position="left">
                     <span
                       style={{
-                        fontSize: '0.6rem',
-                        fontWeight: 700,
-                        color: '#0369a1',
-                        backgroundColor: '#e0f2fe',
-                        padding: '0.05rem 0.3rem',
-                        borderRadius: '3px',
+                        fontSize: '0.7rem',
+                        fontWeight: 600,
+                        color: isProjectActive ? 'var(--accent-primary)' : 'var(--text-muted)',
+                        backgroundColor: isProjectActive ? '#ffffff' : '#f5f0eb',
+                        padding: '0.05rem 0.4rem',
+                        borderRadius: '999px',
                       }}
-                      title="Microservices project"
                     >
-                      MS
+                      {project.totalReleases || 0}
                     </span>
-                  )}
-                  <span
-                    style={{
-                      fontSize: '0.7rem',
-                      fontWeight: 600,
-                      color: isProjectActive ? 'var(--accent-primary)' : 'var(--text-muted)',
-                      backgroundColor: isProjectActive ? '#ffffff' : '#f5f0eb',
-                      padding: '0.05rem 0.4rem',
-                      borderRadius: '999px',
-                    }}
-                  >
-                    {project.totalReleases || 0}
-                  </span>
+                  </Tooltip>
                 </div>
               </NavLink>
             );
