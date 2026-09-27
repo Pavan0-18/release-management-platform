@@ -144,7 +144,7 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
                 onClick={() => {
                   if (onCloseMobile) onCloseMobile();
                 }}
-                title={`Project: [${project.key}] ${project.name}`}
+                title={`Project: ${project.name} (${project.key})${project.description ? `\nDescription: ${project.description}` : ''}\nType: ${isMicroservices ? `Microservices (${serviceCount} services)` : 'Monolith'}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -200,13 +200,16 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
                       textOverflow: 'ellipsis',
                       fontSize: '0.85rem',
                     }}
+                    title={`Project Name: ${project.name}`}
                   >
                     {project.name}
                   </span>
                 </div>
 
                 {/* Project Type Badge & Release Count */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}
+                >
                   {isMicroservices ? (
                     <span
                       style={{
@@ -217,7 +220,7 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
                         padding: '0.05rem 0.3rem',
                         borderRadius: '3px',
                       }}
-                      title={`Project Type: Microservices (${serviceCount} services)`}
+                      title={`Project Type: Microservices Architecture (${serviceCount} configured services)`}
                     >
                       MS
                     </span>
@@ -231,7 +234,7 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
                         padding: '0.05rem 0.3rem',
                         borderRadius: '3px',
                       }}
-                      title="Project Type: Monolith (Single repository)"
+                      title="Project Type: Monolith Architecture (Single unified codebase)"
                     >
                       MN
                     </span>

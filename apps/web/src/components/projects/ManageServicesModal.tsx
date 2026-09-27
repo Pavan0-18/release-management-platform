@@ -88,9 +88,21 @@ export const ManageServicesModal: React.FC<ManageServicesModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Manage Microservices: ${project.name}`} maxWidth="540px">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Manage Microservices: ${project.name}`}
+      maxWidth="540px"
+    >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: '0.85rem',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.4,
+          }}
+        >
           Microservices projects track independent releases, versioning, and verification gates per
           service. Add new services at any time.
         </p>
@@ -194,7 +206,13 @@ export const ManageServicesModal: React.FC<ManageServicesModalProps> = ({
                         backgroundColor: 'var(--accent-primary)',
                       }}
                     />
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                    <span
+                      style={{
+                        fontWeight: 600,
+                        color: 'var(--text-primary)',
+                        fontFamily: 'monospace',
+                      }}
+                    >
                       {svc}
                     </span>
                   </div>

@@ -25,6 +25,7 @@ export const CreateReleaseModal: React.FC<Props> = ({
   const [name, setName] = useState('');
   const [version, setVersion] = useState('');
   const [description, setDescription] = useState('');
+  const [notes, setNotes] = useState('');
   const [targetDate, setTargetDate] = useState('');
   const [checklistItems, setChecklistItems] = useState<
     Array<{ title: string; description?: string; isRequired: boolean }>
@@ -103,6 +104,7 @@ export const CreateReleaseModal: React.FC<Props> = ({
         name: name.trim(),
         version: version.trim(),
         description: description.trim() || undefined,
+        notes: notes.trim() || undefined,
         targetDate: targetDate ? new Date(targetDate).toISOString() : undefined,
         steps: checklistItems.map((item) => ({
           title: item.title,
@@ -115,6 +117,7 @@ export const CreateReleaseModal: React.FC<Props> = ({
           setName('');
           setVersion('');
           setDescription('');
+          setNotes('');
           setTargetDate('');
           setSelectedService('');
           onClose();
@@ -245,9 +248,18 @@ export const CreateReleaseModal: React.FC<Props> = ({
           label="Description"
           innerLabel={true}
           rows={2}
-          placeholder="Summary of deployment notes..."
+          placeholder="Brief summary or scope of this release..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+        />
+
+        <Textarea
+          label="Release Notes & Documentation (Optional)"
+          innerLabel={true}
+          rows={3}
+          placeholder="Detailed release notes, runbook links, deployment steps..."
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
         />
 
         {/* Verification Checklist Steps */}

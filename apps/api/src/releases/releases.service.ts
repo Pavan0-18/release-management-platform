@@ -166,6 +166,7 @@ export class ReleasesService {
         name: name.trim(),
         version: version.trim(),
         description: description?.trim() || null,
+        notes: input.notes?.trim() || null,
         targetDate,
         steps: {
           create: stepsToCreate,
@@ -188,49 +189,57 @@ export class ReleasesService {
   async update(input: UpdateReleaseInput): Promise<ReleaseModel> {
     const { id, ...data } = input;
 
-    // Verify existence
-    await this.findOne(id);
-
-    const updated = await this.prisma.release.update({
-      where: { id },
-      data: {
-        serviceName: data.serviceName !== undefined ? data.serviceName?.trim() || null : undefined,
-        name: data.name !== undefined ? data.name.trim() : undefined,
-        version: data.version !== undefined ? data.version.trim() : undefined,
-        description: data.description !== undefined ? data.description?.trim() || null : undefined,
-        status: data.status,
-        targetDate: data.targetDate,
-      },
-      include: {
-        project: true,
-        steps: {
-          orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
+    try {
+      const updated = await this.prisma.release.update({
+        where: { id },
+        data: {
+          serviceName:
+            data.serviceName !== undefined ? data.serviceName?.trim() || null : undefined,
+          name: data.name !== undefined ? data.name.trim() : undefined,
+          version: data.version !== undefined ? data.version.trim() : undefined,
+          description:
+            data.description !== undefined ? data.description?.trim() || null : undefined,
+          notes: data.notes !== undefined ? data.notes?.trim() || null : undefined,
+          status: data.status,
+          targetDate: data.targetDate,
         },
-      },
-    });
+        include: {
+          project: true,
+          steps: {
+            orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
+          },
+        },
+      });
 
-    this.logger.log(`Updated release "${updated.id}"`);
-    return this.mapReleaseMetrics(updated);
+      this.logger.log(`Updated release "${updated.id}"`);
+      return this.mapReleaseMetrics(updated);
+    } catch (err: any) {
+      if (err.code === 'P2025') {
+        throw new NotFoundException(`Release with ID "${id}" not found`);
+      }
+      throw err;
+    }
   }
 
   async delete(id: string): Promise<boolean> {
-    await this.findOne(id);
+    try {
+      await this.prisma.release.delete({
+        where: { id },
+      });
 
-    await this.prisma.release.delete({
-      where: { id },
-    });
-
-    this.logger.log(`Deleted release "${id}"`);
-    return true;
+      this.logger.log(`Deleted release "${id}"`);
+      return true;
+    } catch (err: any) {
+      if (err.code === 'P2025') {
+        throw new NotFoundException(`Release with ID "${id}" not found`);
+      }
+      throw err;
+    }
   }
 
   async addStep(input: CreateReleaseStepInput): Promise<ReleaseStepModel> {
     const { releaseId, title, description, isRequired, order } = input;
 
-    // Verify release exists
-    await this.findOne(releaseId);
-
-    // If order not explicitly provided, put it at the end
     let stepOrder = order;
     if (stepOrder === undefined) {
       const stepCount = await this.prisma.releaseStep.count({
@@ -239,60 +248,66 @@ export class ReleasesService {
       stepOrder = stepCount;
     }
 
-    const step = await this.prisma.releaseStep.create({
-      data: {
-        releaseId,
-        title: title.trim(),
-        description: description?.trim() || null,
-        isRequired: isRequired !== undefined ? isRequired : true,
-        order: stepOrder,
-      },
-    });
+    try {
+      const step = await this.prisma.releaseStep.create({
+        data: {
+          releaseId,
+          title: title.trim(),
+          description: description?.trim() || null,
+          isRequired: isRequired !== undefined ? isRequired : true,
+          order: stepOrder,
+        },
+      });
 
-    this.logger.log(`Added step "${step.title}" to release "${releaseId}"`);
-    return step;
+      this.logger.log(`Added step "${step.title}" to release "${releaseId}"`);
+      return step;
+    } catch (err: any) {
+      if (err.code === 'P2003') {
+        throw new NotFoundException(`Release with ID "${releaseId}" not found`);
+      }
+      throw err;
+    }
   }
 
   async updateStep(input: UpdateReleaseStepInput): Promise<ReleaseStepModel> {
     const { id, ...data } = input;
 
-    const existing = await this.prisma.releaseStep.findUnique({
-      where: { id },
-    });
+    try {
+      const updated = await this.prisma.releaseStep.update({
+        where: { id },
+        data: {
+          title: data.title !== undefined ? data.title.trim() : undefined,
+          description:
+            data.description !== undefined ? data.description?.trim() || null : undefined,
+          status: data.status,
+          isRequired: data.isRequired,
+          order: data.order,
+        },
+      });
 
-    if (!existing) {
-      throw new NotFoundException(`Release step with ID "${id}" not found`);
+      this.logger.log(`Updated release step "${id}"`);
+      return updated;
+    } catch (err: any) {
+      if (err.code === 'P2025') {
+        throw new NotFoundException(`Release step with ID "${id}" not found`);
+      }
+      throw err;
     }
-
-    const updated = await this.prisma.releaseStep.update({
-      where: { id },
-      data: {
-        title: data.title !== undefined ? data.title.trim() : undefined,
-        description: data.description !== undefined ? data.description?.trim() || null : undefined,
-        status: data.status,
-        isRequired: data.isRequired,
-        order: data.order,
-      },
-    });
-
-    this.logger.log(`Updated release step "${id}"`);
-    return updated;
   }
 
   async deleteStep(id: string): Promise<boolean> {
-    const existing = await this.prisma.releaseStep.findUnique({
-      where: { id },
-    });
+    try {
+      await this.prisma.releaseStep.delete({
+        where: { id },
+      });
 
-    if (!existing) {
-      throw new NotFoundException(`Release step with ID "${id}" not found`);
+      this.logger.log(`Deleted release step "${id}"`);
+      return true;
+    } catch (err: any) {
+      if (err.code === 'P2025') {
+        throw new NotFoundException(`Release step with ID "${id}" not found`);
+      }
+      throw err;
     }
-
-    await this.prisma.releaseStep.delete({
-      where: { id },
-    });
-
-    this.logger.log(`Deleted release step "${id}"`);
-    return true;
   }
 }

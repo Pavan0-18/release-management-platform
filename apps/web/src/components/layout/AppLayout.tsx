@@ -20,10 +20,7 @@ export const AppLayout: React.FC = () => {
       />
 
       {/* Left Sidebar (Sticky on Desktop, Drawer on Mobile) */}
-      <ProjectSidebar
-        isMobileOpen={isMobileOpen}
-        onCloseMobile={() => setIsMobileOpen(false)}
-      />
+      <ProjectSidebar isMobileOpen={isMobileOpen} onCloseMobile={() => setIsMobileOpen(false)} />
 
       {/* Main Viewport */}
       <div className="app-main-viewport">
@@ -48,7 +45,6 @@ export const AppLayout: React.FC = () => {
           >
             ☰
           </button>
-
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <span
               style={{
@@ -60,7 +56,6 @@ export const AppLayout: React.FC = () => {
               Release Hub
             </span>
           </div>
-
           <div style={{ width: '36px' }} /> {/* Spacer for symmetry */}
         </header>
 

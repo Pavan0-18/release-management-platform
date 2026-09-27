@@ -38,6 +38,7 @@ export interface Release {
   name: string;
   version: string;
   description?: string | null;
+  notes?: string | null;
   status: ReleaseStatus;
   targetDate?: string | null;
   steps: ReleaseStep[];
@@ -54,6 +55,7 @@ export interface CreateReleaseInput {
   name: string;
   version: string;
   description?: string;
+  notes?: string;
   targetDate?: string;
   steps?: CreateStepInlineInput[];
 }
@@ -70,6 +72,7 @@ export interface UpdateReleaseInput {
   name?: string;
   version?: string;
   description?: string;
+  notes?: string;
   status?: ReleaseStatus;
   targetDate?: string;
 }

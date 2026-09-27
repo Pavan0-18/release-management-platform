@@ -28,6 +28,7 @@ const GET_RELEASES_GQL = `
       name
       version
       description
+      notes
       status
       targetDate
       createdAt
@@ -60,6 +61,7 @@ const GET_RELEASE_GQL = `
       name
       version
       description
+      notes
       status
       targetDate
       createdAt
@@ -97,6 +99,7 @@ const CREATE_RELEASE_GQL = `
       name
       version
       description
+      notes
       status
       targetDate
       totalSteps
@@ -114,6 +117,7 @@ const UPDATE_RELEASE_GQL = `
       name
       version
       description
+      notes
       status
       targetDate
       updatedAt

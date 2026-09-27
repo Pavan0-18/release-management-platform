@@ -29,6 +29,12 @@ export class ReleaseModel {
   @Field(() => String, { nullable: true, description: 'Summary notes or scope of this release' })
   description?: string | null;
 
+  @Field(() => String, {
+    nullable: true,
+    description: 'Release notes, deployment documentation, or changelog',
+  })
+  notes?: string | null;
+
   @Field(() => ReleaseStatus, { description: 'Current lifecycle state' })
   status!: ReleaseStatus;
 

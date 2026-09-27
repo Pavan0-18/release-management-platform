@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ReleaseStatus, ProjectNature } from '@rmp/shared';
-import { useReleases, useUpdateRelease } from '../hooks/useReleases';
+import { useReleases } from '../hooks/useReleases';
 import { useProject, useProjects } from '../hooks/useProjects';
 import { CreateReleaseModal } from '../components/releases/CreateReleaseModal';
 import { CreateProjectModal } from '../components/projects/CreateProjectModal';
@@ -25,7 +25,6 @@ export const ReleasesPage: React.FC = () => {
   const activeProjectId = projectId || (allProjects.length > 0 ? allProjects[0].id : undefined);
 
   const { data: currentProject, isLoading: isLoadingCurrentProject } = useProject(activeProjectId);
-  const updateReleaseMutation = useUpdateRelease();
 
   // Auto redirect from /releases to first project if available
   useEffect(() => {
@@ -41,44 +40,67 @@ export const ReleasesPage: React.FC = () => {
     setSearchTerm('');
   }, [activeProjectId]);
 
+  // Query all project releases once for instant client-side filtering and fast metrics
   const {
-    data: releases = [],
+    data: allProjectReleases = [],
     isLoading: isLoadingReleases,
     error,
   } = useReleases({
     projectId: activeProjectId,
-    serviceName: serviceFilter || undefined,
-    status: statusFilter ? (statusFilter as ReleaseStatus) : undefined,
-    search: searchTerm.trim() || undefined,
   });
 
-  // Query all project releases for status count indicators
-  const { data: allProjectReleases = [] } = useReleases({
-    projectId: activeProjectId,
-  });
+  const releases = useMemo(() => {
+    return allProjectReleases.filter((r) => {
+      if (serviceFilter && r.serviceName !== serviceFilter) return false;
+      if (statusFilter && r.status !== statusFilter) return false;
+      if (searchTerm) {
+        const q = searchTerm.toLowerCase();
+        const matchesName = r.name.toLowerCase().includes(q);
+        const matchesVer = r.version.toLowerCase().includes(q);
+        const matchesService = r.serviceName?.toLowerCase().includes(q);
+        const matchesDesc = r.description?.toLowerCase().includes(q);
+        const matchesNotes = r.notes?.toLowerCase().includes(q);
+        if (!matchesName && !matchesVer && !matchesService && !matchesDesc && !matchesNotes)
+          return false;
+      }
+      return true;
+    });
+  }, [allProjectReleases, serviceFilter, statusFilter, searchTerm]);
 
   const isMicroservices = currentProject?.nature === ProjectNature.MICROSERVICES;
   const projectServices: string[] = currentProject?.services || [];
 
   const totalCount = allProjectReleases.length;
-  const inProgressCount = allProjectReleases.filter((r) => r.status === ReleaseStatus.IN_PROGRESS).length;
-  const deployedCount = allProjectReleases.filter((r) => r.status === ReleaseStatus.DEPLOYED).length;
+  const inProgressCount = allProjectReleases.filter(
+    (r) => r.status === ReleaseStatus.IN_PROGRESS,
+  ).length;
+  const deployedCount = allProjectReleases.filter(
+    (r) => r.status === ReleaseStatus.DEPLOYED,
+  ).length;
   const readyCount = allProjectReleases.filter(
     (r) => r.status === ReleaseStatus.READY_FOR_DEPLOYMENT,
   ).length;
   const draftCount = allProjectReleases.filter((r) => r.status === ReleaseStatus.DRAFT).length;
 
-  const handleStatusChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-    releaseId: string,
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const newStatus = e.target.value as ReleaseStatus;
-    updateReleaseMutation.mutate({
-      id: releaseId,
-      status: newStatus,
-    });
+  const formatStatus = (status: ReleaseStatus) => {
+    switch (status) {
+      case ReleaseStatus.READY_FOR_DEPLOYMENT:
+        return 'Ready for Deployment';
+      case ReleaseStatus.IN_PROGRESS:
+        return 'In Progress';
+      case ReleaseStatus.DEPLOYED:
+        return 'Deployed';
+      case ReleaseStatus.DRAFT:
+        return 'Draft';
+      case ReleaseStatus.PLANNED:
+        return 'Planned';
+      case ReleaseStatus.FAILED:
+        return 'Failed';
+      case ReleaseStatus.CANCELLED:
+        return 'Cancelled';
+      default:
+        return status;
+    }
   };
 
   const getStatusBadgeColors = (status: ReleaseStatus) => {
@@ -116,7 +138,14 @@ export const ReleasesPage: React.FC = () => {
           borderRadius: 'var(--radius-lg)',
         }}
       >
-        <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+        <h2
+          style={{
+            fontSize: '1.2rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            marginBottom: '0.5rem',
+          }}
+        >
           No Projects Found
         </h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
@@ -163,10 +192,19 @@ export const ReleasesPage: React.FC = () => {
                 borderRadius: '4px',
                 letterSpacing: '0.02em',
               }}
+              title={`Project Key: ${currentProject.key}`}
             >
               {currentProject.key}
             </span>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+            <h2
+              style={{
+                fontSize: '1.2rem',
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                margin: 0,
+              }}
+              title={`Project Name: ${currentProject.name}${currentProject.description ? `\nDescription: ${currentProject.description}` : ''}`}
+            >
               {currentProject.name}
             </h2>
             <span
@@ -178,6 +216,7 @@ export const ReleasesPage: React.FC = () => {
                 backgroundColor: isMicroservices ? '#e0f2fe' : '#f5f5f4',
                 color: isMicroservices ? '#0369a1' : '#57534e',
               }}
+              title={`Project Architecture: ${isMicroservices ? `Microservices (${projectServices.length} independent services configured)` : 'Monolith (Single unified codebase & deployment)'}`}
             >
               {isMicroservices ? `Microservices (${projectServices.length})` : 'Monolith'}
             </span>
@@ -185,19 +224,11 @@ export const ReleasesPage: React.FC = () => {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {isMicroservices && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsManageServicesOpen(true)}
-              >
+              <Button variant="secondary" size="sm" onClick={() => setIsManageServicesOpen(true)}>
                 ⚙️ Services
               </Button>
             )}
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => setIsCreateReleaseOpen(true)}
-            >
+            <Button variant="primary" size="sm" onClick={() => setIsCreateReleaseOpen(true)}>
               + New Release
             </Button>
           </div>
@@ -374,7 +405,15 @@ export const ReleasesPage: React.FC = () => {
 
       {/* 3. Microservice Filter Pills (If microservices project) */}
       {isMicroservices && projectServices.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap', padding: '0 0.25rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            flexWrap: 'wrap',
+            padding: '0 0.25rem',
+          }}
+        >
           <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
             Service:
           </span>
@@ -387,7 +426,10 @@ export const ReleasesPage: React.FC = () => {
               fontSize: '0.75rem',
               fontWeight: 600,
               cursor: 'pointer',
-              border: serviceFilter === '' ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
+              border:
+                serviceFilter === ''
+                  ? '1px solid var(--accent-primary)'
+                  : '1px solid var(--border-color)',
               backgroundColor: serviceFilter === '' ? 'var(--accent-light)' : '#ffffff',
               color: serviceFilter === '' ? 'var(--accent-primary)' : 'var(--text-secondary)',
             }}
@@ -406,7 +448,8 @@ export const ReleasesPage: React.FC = () => {
                 fontWeight: 600,
                 cursor: 'pointer',
                 fontFamily: 'monospace',
-                border: serviceFilter === svc ? '1px solid #0369a1' : '1px solid var(--border-color)',
+                border:
+                  serviceFilter === svc ? '1px solid #0369a1' : '1px solid var(--border-color)',
                 backgroundColor: serviceFilter === svc ? '#e0f2fe' : '#ffffff',
                 color: serviceFilter === svc ? '#0369a1' : 'var(--text-secondary)',
               }}
@@ -437,7 +480,9 @@ export const ReleasesPage: React.FC = () => {
           }}
         >
           <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: '0 0 1rem 0' }}>
-            {searchTerm || statusFilter || serviceFilter ? 'No matching releases' : 'No releases yet'}
+            {searchTerm || statusFilter || serviceFilter
+              ? 'No matching releases'
+              : 'No releases yet'}
           </p>
           <Button variant="primary" size="sm" onClick={() => setIsCreateReleaseOpen(true)}>
             + Create Release
@@ -467,7 +512,16 @@ export const ReleasesPage: React.FC = () => {
                   flexWrap: 'wrap',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', minWidth: 0, flex: 1 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    flexWrap: 'wrap',
+                    minWidth: 0,
+                    flex: 1,
+                  }}
+                >
                   <span
                     style={{
                       fontFamily: 'monospace',
@@ -512,54 +566,32 @@ export const ReleasesPage: React.FC = () => {
                   </span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}
+                >
+                  <span
+                    style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}
+                  >
                     Gates: {release.completedSteps}/{release.totalSteps}
                   </span>
 
-                  {/* Direct Status Selector Dropdown */}
-                  <div
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
+                  {/* Static Status Badge */}
+                  <span
+                    style={{
+                      backgroundColor: badgeColors.bg,
+                      color: badgeColors.color,
+                      border: `1px solid ${badgeColors.border}`,
+                      borderRadius: '999px',
+                      padding: '0.2rem 0.65rem',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      lineHeight: 1.2,
+                      display: 'inline-flex',
+                      alignItems: 'center',
                     }}
-                    style={{ position: 'relative' }}
                   >
-                    <select
-                      value={release.status}
-                      disabled={updateReleaseMutation.isPending}
-                      onChange={(e) => handleStatusChange(e, release.id)}
-                      onClick={(e) => e.stopPropagation()}
-                      style={{
-                        appearance: 'none',
-                        WebkitAppearance: 'none',
-                        MozAppearance: 'none',
-                        backgroundColor: badgeColors.bg,
-                        color: badgeColors.color,
-                        border: `1px solid ${badgeColors.border}`,
-                        borderRadius: '999px',
-                        padding: '0.2rem 1.4rem 0.2rem 0.6rem',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        outline: 'none',
-                        lineHeight: 1.2,
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='${encodeURIComponent(badgeColors.color)}' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
-                        backgroundPosition: 'right 0.35rem center',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: '12px',
-                      }}
-                      title="Click to change status"
-                    >
-                      <option value={ReleaseStatus.DRAFT}>Draft</option>
-                      <option value={ReleaseStatus.PLANNED}>Planned</option>
-                      <option value={ReleaseStatus.IN_PROGRESS}>In Progress</option>
-                      <option value={ReleaseStatus.READY_FOR_DEPLOYMENT}>Ready for Deployment</option>
-                      <option value={ReleaseStatus.DEPLOYED}>Deployed</option>
-                      <option value={ReleaseStatus.FAILED}>Failed</option>
-                      <option value={ReleaseStatus.CANCELLED}>Cancelled</option>
-                    </select>
-                  </div>
+                    {formatStatus(release.status)}
+                  </span>
                 </div>
               </Link>
             );

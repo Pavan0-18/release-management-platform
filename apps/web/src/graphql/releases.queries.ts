@@ -7,6 +7,7 @@ export const GET_RELEASES = gql`
       name
       version
       description
+      notes
       status
       targetDate
       totalSteps
@@ -32,6 +33,7 @@ export const GET_RELEASE = gql`
       name
       version
       description
+      notes
       status
       targetDate
       totalSteps
@@ -61,6 +63,7 @@ export const CREATE_RELEASE = gql`
       name
       version
       description
+      notes
       status
       targetDate
       totalSteps
@@ -77,6 +80,7 @@ export const UPDATE_RELEASE = gql`
       name
       version
       description
+      notes
       status
       targetDate
       totalSteps

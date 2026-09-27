@@ -43,6 +43,7 @@ model Release {
   name        String
   version     String
   description String?
+  notes       String?       // Deployment notes, changelog, or post-release summaries
   status      ReleaseStatus @default(DRAFT)
   targetDate  DateTime?
   steps       ReleaseStep[]
@@ -52,6 +53,8 @@ model Release {
   @@unique([projectId, serviceName, version])
   @@index([projectId])
   @@index([projectId, serviceName])
+  @@index([projectId, status])
+  @@index([status])
   @@map("releases")
 }
 

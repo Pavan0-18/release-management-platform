@@ -28,6 +28,11 @@ export class UpdateReleaseInput {
   @IsOptional()
   description?: string;
 
+  @Field(() => String, { nullable: true, description: 'Updated release notes or changelog' })
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
   @Field(() => ReleaseStatus, { nullable: true })
   @IsEnum(ReleaseStatus)
   @IsOptional()

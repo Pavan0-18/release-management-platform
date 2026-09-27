@@ -32,11 +32,27 @@ export const ServicesMatrixView: React.FC<ServicesMatrixViewProps> = ({
         }}
       >
         <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🧩</div>
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 0.5rem 0' }}>
+        <h3
+          style={{
+            fontSize: '1.15rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            margin: '0 0 0.5rem 0',
+          }}
+        >
           No Microservices Configured
         </h3>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '1.25rem', maxWidth: '400px', margin: '0 auto 1.25rem auto' }}>
-          Add your backend, frontend, worker, or API gateway services to manage independent release cycles.
+        <p
+          style={{
+            color: 'var(--text-secondary)',
+            fontSize: '0.875rem',
+            marginBottom: '1.25rem',
+            maxWidth: '400px',
+            margin: '0 auto 1.25rem auto',
+          }}
+        >
+          Add your backend, frontend, worker, or API gateway services to manage independent release
+          cycles.
         </p>
         <Button variant="primary" onClick={onManageServices}>
           + Add Services
@@ -66,10 +82,24 @@ export const ServicesMatrixView: React.FC<ServicesMatrixViewProps> = ({
           }}
         >
           <div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+              }}
+            >
               Configured Services
             </div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
+            <div
+              style={{
+                fontSize: '1.4rem',
+                fontWeight: 800,
+                color: 'var(--text-primary)',
+                marginTop: '0.2rem',
+              }}
+            >
               {services.length}
             </div>
           </div>
@@ -101,13 +131,24 @@ export const ServicesMatrixView: React.FC<ServicesMatrixViewProps> = ({
           }}
         >
           <div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+              }}
+            >
               Live Deployed Services
             </div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#16a34a', marginTop: '0.2rem' }}>
+            <div
+              style={{ fontSize: '1.4rem', fontWeight: 800, color: '#16a34a', marginTop: '0.2rem' }}
+            >
               {
                 services.filter((svc) =>
-                  releases.some((r) => r.serviceName === svc && r.status === ReleaseStatus.DEPLOYED),
+                  releases.some(
+                    (r) => r.serviceName === svc && r.status === ReleaseStatus.DEPLOYED,
+                  ),
                 ).length
               }{' '}
               <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
@@ -143,10 +184,19 @@ export const ServicesMatrixView: React.FC<ServicesMatrixViewProps> = ({
           }}
         >
           <div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+              }}
+            >
               Active Pipelines
             </div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#b45309', marginTop: '0.2rem' }}>
+            <div
+              style={{ fontSize: '1.4rem', fontWeight: 800, color: '#b45309', marginTop: '0.2rem' }}
+            >
               {
                 releases.filter(
                   (r) =>
@@ -184,8 +234,12 @@ export const ServicesMatrixView: React.FC<ServicesMatrixViewProps> = ({
       >
         {services.map((serviceName) => {
           const serviceReleases = releases.filter((r) => r.serviceName === serviceName);
-          const deployedReleases = serviceReleases.filter((r) => r.status === ReleaseStatus.DEPLOYED);
-          const inProgressReleases = serviceReleases.filter((r) => r.status === ReleaseStatus.IN_PROGRESS);
+          const deployedReleases = serviceReleases.filter(
+            (r) => r.status === ReleaseStatus.DEPLOYED,
+          );
+          const inProgressReleases = serviceReleases.filter(
+            (r) => r.status === ReleaseStatus.IN_PROGRESS,
+          );
           const readyReleases = serviceReleases.filter(
             (r) => r.status === ReleaseStatus.READY_FOR_DEPLOYMENT,
           );
@@ -289,7 +343,13 @@ export const ServicesMatrixView: React.FC<ServicesMatrixViewProps> = ({
                     Live Deployed Version
                   </div>
                   {latestDeployed ? (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
+                    >
                       <span
                         style={{
                           fontSize: '0.95rem',
@@ -313,15 +373,35 @@ export const ServicesMatrixView: React.FC<ServicesMatrixViewProps> = ({
                       </Link>
                     </div>
                   ) : (
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                    <span
+                      style={{
+                        fontSize: '0.8rem',
+                        color: 'var(--text-muted)',
+                        fontStyle: 'italic',
+                      }}
+                    >
                       No deployed version yet
                     </span>
                   )}
                 </div>
 
                 {/* Pipeline Breakdown */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1rem' }}>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.4rem',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '0.7rem',
+                      color: 'var(--text-muted)',
+                      fontWeight: 600,
+                      textTransform: 'uppercase',
+                    }}
+                  >
                     Pipeline Status
                   </div>
                   <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>

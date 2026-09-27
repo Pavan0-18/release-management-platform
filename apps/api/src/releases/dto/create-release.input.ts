@@ -52,6 +52,14 @@ export class CreateReleaseInput {
   @IsOptional()
   description?: string;
 
+  @Field(() => String, {
+    nullable: true,
+    description: 'Release documentation, notes, or changelog',
+  })
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
   @Field(() => Date, { nullable: true })
   @IsOptional()
   targetDate?: Date;
