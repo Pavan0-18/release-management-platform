@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReleaseInput } from './dto/create-release.input';
 import { UpdateReleaseInput } from './dto/update-release.input';
@@ -28,6 +28,13 @@ export class ReleasesService {
 
     return {
       ...release,
+      project: release.project
+        ? {
+            ...release.project,
+            defaultChecklist: (release.project.defaultChecklist as any) || [],
+            totalReleases: release.project._count?.releases ?? 0,
+          }
+        : undefined,
       steps,
       totalSteps,
       completedSteps,
@@ -37,6 +44,10 @@ export class ReleasesService {
 
   async findAll(filter?: FilterReleasesInput): Promise<ReleaseModel[]> {
     const where: any = {};
+
+    if (filter?.projectId) {
+      where.projectId = filter.projectId;
+    }
 
     if (filter?.status) {
       where.status = filter.status;
@@ -53,6 +64,7 @@ export class ReleasesService {
     const releases = await this.prisma.release.findMany({
       where,
       include: {
+        project: true,
         steps: {
           orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
         },
@@ -67,6 +79,7 @@ export class ReleasesService {
     const release = await this.prisma.release.findUnique({
       where: { id },
       include: {
+        project: true,
         steps: {
           orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
         },
@@ -81,26 +94,75 @@ export class ReleasesService {
   }
 
   async create(input: CreateReleaseInput): Promise<ReleaseModel> {
-    const { name, version, description, targetDate, steps } = input;
+    const { projectId, name, version, description, targetDate, steps } = input;
 
-    const initialSteps = (steps || []).map((step, idx) => ({
-      title: step.title,
-      description: step.description,
-      isRequired: step.isRequired !== undefined ? step.isRequired : true,
-      order: idx,
-    }));
+    // Verify parent project exists
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+    });
+
+    if (!project) {
+      throw new NotFoundException(`Project with ID "${projectId}" not found`);
+    }
+
+    // Check version uniqueness within this project
+    const existingRelease = await this.prisma.release.findUnique({
+      where: {
+        projectId_version: {
+          projectId,
+          version: version.trim(),
+        },
+      },
+    });
+
+    if (existingRelease) {
+      throw new ConflictException(
+        `A release with version "${version}" already exists in project "${project.name}"`,
+      );
+    }
+
+    // If no steps are explicitly provided, auto-populate from Project's default checklist
+    let stepsToCreate: {
+      title: string;
+      description?: string;
+      isRequired: boolean;
+      order: number;
+    }[] = [];
+
+    if (steps && steps.length > 0) {
+      stepsToCreate = steps.map((step, idx) => ({
+        title: step.title.trim(),
+        description: step.description?.trim(),
+        isRequired: step.isRequired !== undefined ? step.isRequired : true,
+        order: idx,
+      }));
+    } else if (project.defaultChecklist && Array.isArray(project.defaultChecklist)) {
+      const defaultItems = project.defaultChecklist as Array<{
+        title: string;
+        description?: string;
+        isRequired?: boolean;
+      }>;
+      stepsToCreate = defaultItems.map((item, idx) => ({
+        title: item.title,
+        description: item.description,
+        isRequired: item.isRequired !== undefined ? item.isRequired : true,
+        order: idx,
+      }));
+    }
 
     const release = await this.prisma.release.create({
       data: {
-        name,
-        version,
-        description,
+        projectId,
+        name: name.trim(),
+        version: version.trim(),
+        description: description?.trim() || null,
         targetDate,
         steps: {
-          create: initialSteps,
+          create: stepsToCreate,
         },
       },
       include: {
+        project: true,
         steps: {
           orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
         },
@@ -108,7 +170,7 @@ export class ReleasesService {
     });
 
     this.logger.log(
-      `Created release "${release.name}" (${release.version}) with ${initialSteps.length} steps`,
+      `Created release "${release.name}" (${release.version}) in project "${project.name}" with ${stepsToCreate.length} steps`,
     );
     return this.mapReleaseMetrics(release);
   }
@@ -121,8 +183,15 @@ export class ReleasesService {
 
     const updated = await this.prisma.release.update({
       where: { id },
-      data,
+      data: {
+        name: data.name !== undefined ? data.name.trim() : undefined,
+        version: data.version !== undefined ? data.version.trim() : undefined,
+        description: data.description !== undefined ? data.description?.trim() || null : undefined,
+        status: data.status,
+        targetDate: data.targetDate,
+      },
       include: {
+        project: true,
         steps: {
           orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
         },
@@ -162,8 +231,8 @@ export class ReleasesService {
     const step = await this.prisma.releaseStep.create({
       data: {
         releaseId,
-        title,
-        description,
+        title: title.trim(),
+        description: description?.trim() || null,
         isRequired: isRequired !== undefined ? isRequired : true,
         order: stepOrder,
       },
@@ -186,7 +255,13 @@ export class ReleasesService {
 
     const updated = await this.prisma.releaseStep.update({
       where: { id },
-      data,
+      data: {
+        title: data.title !== undefined ? data.title.trim() : undefined,
+        description: data.description !== undefined ? data.description?.trim() || null : undefined,
+        status: data.status,
+        isRequired: data.isRequired,
+        order: data.order,
+      },
     });
 
     this.logger.log(`Updated release step "${id}"`);

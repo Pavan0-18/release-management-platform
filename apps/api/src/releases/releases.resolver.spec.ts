@@ -72,7 +72,7 @@ describe('ReleasesResolver', () => {
   });
 
   it('createRelease should call ReleasesService.create', async () => {
-    const input = { name: 'v1.0.0 Release', version: 'v1.0.0' };
+    const input = { projectId: 'proj-123', name: 'v1.0.0 Release', version: 'v1.0.0' };
     const result = await resolver.createRelease(input);
     expect(result).toBeDefined();
     expect(service.create).toHaveBeenCalledWith(input);

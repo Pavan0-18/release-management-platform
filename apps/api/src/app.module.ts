@@ -6,6 +6,7 @@ import { join } from 'path';
 import configuration from './config/configuration';
 import { PrismaModule } from './prisma/prisma.module';
 import { HealthModule } from './health/health.module';
+import { ProjectsModule } from './projects/projects.module';
 import { ReleasesModule } from './releases/releases.module';
 
 @Module({
@@ -30,6 +31,7 @@ import { ReleasesModule } from './releases/releases.module';
     }),
     PrismaModule,
     HealthModule,
+    ProjectsModule,
     ReleasesModule,
   ],
 })

@@ -1,11 +1,18 @@
 import { Field, ID, Float, Int, ObjectType } from '@nestjs/graphql';
 import { ReleaseStatus } from '../enums/release-status.enum';
 import { ReleaseStepModel } from './release-step.model';
+import { ProjectModel } from '../../projects/models/project.model';
 
 @ObjectType({ description: 'A governed software release with checklist steps' })
 export class ReleaseModel {
   @Field(() => ID)
   id!: string;
+
+  @Field(() => ID, { description: 'Project ID this release belongs to' })
+  projectId!: string;
+
+  @Field(() => ProjectModel, { nullable: true, description: 'Parent project' })
+  project?: ProjectModel;
 
   @Field(() => String, { description: 'Name of the release' })
   name!: string;

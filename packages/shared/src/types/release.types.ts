@@ -1,3 +1,5 @@
+import { Project } from './project.types';
+
 export enum ReleaseStatus {
   DRAFT = 'DRAFT',
   PLANNED = 'PLANNED',
@@ -30,6 +32,8 @@ export interface ReleaseStep {
 
 export interface Release {
   id: string;
+  projectId: string;
+  project?: Project;
   name: string;
   version: string;
   description?: string | null;
@@ -44,6 +48,7 @@ export interface Release {
 }
 
 export interface CreateReleaseInput {
+  projectId: string;
   name: string;
   version: string;
   description?: string;

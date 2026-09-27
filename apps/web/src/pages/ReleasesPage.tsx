@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Release, ReleaseStatus } from '@rmp/shared';
 import { useReleases } from '../hooks/useReleases';
+import { useProject, useProjects } from '../hooks/useProjects';
 import { ReleaseStatusBadge } from '../components/releases/ReleaseStatusBadge';
 import { ProgressBar } from '../components/releases/ProgressBar';
 import { CreateReleaseModal } from '../components/releases/CreateReleaseModal';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
-import { Input, Select, Button } from '../components/common/form';
+import { Input, Button } from '../components/common/form';
 
 export const ReleasesPage: React.FC = () => {
+  const { projectId } = useParams<{ projectId?: string }>();
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+  const { data: currentProject } = useProject(projectId);
+  const { data: allProjects = [] } = useProjects();
 
   const {
     data: releases = [],
@@ -20,6 +25,7 @@ export const ReleasesPage: React.FC = () => {
     error,
     refetch,
   } = useReleases({
+    projectId: projectId || undefined,
     status: statusFilter ? (statusFilter as ReleaseStatus) : undefined,
     search: searchTerm.trim() || undefined,
   });
@@ -28,161 +34,309 @@ export const ReleasesPage: React.FC = () => {
   const inProgressCount = releases.filter((r) => r.status === ReleaseStatus.IN_PROGRESS).length;
   const deployedCount = releases.filter((r) => r.status === ReleaseStatus.DEPLOYED).length;
   const draftCount = releases.filter((r) => r.status === ReleaseStatus.DRAFT).length;
+  const readyCount = releases.filter((r) => r.status === ReleaseStatus.READY_FOR_DEPLOYMENT).length;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Page Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}
-      >
-        <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-            Releases
-          </h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.2rem' }}>
-            Release checklist tracking and deployment governance
-          </p>
-        </div>
-
-        <Button variant="primary" onClick={() => setIsCreateOpen(true)}>
-          + New Release
-        </Button>
-      </div>
-
-      {/* Summary Metrics */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: '0.75rem',
-        }}
-      >
-        <div className="card" style={{ padding: '1rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {/* Project Banner or Global Releases Header */}
+      {projectId && currentProject ? (
+        <div
+          className="card"
+          style={{
+            padding: '1.25rem 1.5rem',
+            backgroundColor: '#ffffff',
+            borderLeft: '4px solid var(--accent-primary)',
+          }}
+        >
           <div
             style={{
-              fontSize: '0.75rem',
-              color: 'var(--text-secondary)',
-              fontWeight: 600,
-              textTransform: 'uppercase',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              flexWrap: 'wrap',
+              gap: '1rem',
             }}
           >
-            Total Releases
-          </div>
-          <div
-            style={{
-              fontSize: '1.5rem',
-              fontWeight: 700,
-              marginTop: '0.2rem',
-              color: 'var(--text-primary)',
-            }}
-          >
-            {totalCount}
-          </div>
-        </div>
-
-        <div className="card" style={{ padding: '1rem' }}>
-          <div
-            style={{
-              fontSize: '0.75rem',
-              color: 'var(--text-secondary)',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-            }}
-          >
-            In Progress
-          </div>
-          <div
-            style={{ fontSize: '1.5rem', fontWeight: 700, marginTop: '0.2rem', color: '#b45309' }}
-          >
-            {inProgressCount}
-          </div>
-        </div>
-
-        <div className="card" style={{ padding: '1rem' }}>
-          <div
-            style={{
-              fontSize: '0.75rem',
-              color: 'var(--text-secondary)',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-            }}
-          >
-            Deployed
-          </div>
-          <div
-            style={{ fontSize: '1.5rem', fontWeight: 700, marginTop: '0.2rem', color: '#15803d' }}
-          >
-            {deployedCount}
-          </div>
-        </div>
-
-        <div className="card" style={{ padding: '1rem' }}>
-          <div
-            style={{
-              fontSize: '0.75rem',
-              color: 'var(--text-secondary)',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-            }}
-          >
-            Drafts
-          </div>
-          <div
-            style={{ fontSize: '1.5rem', fontWeight: 700, marginTop: '0.2rem', color: '#78716c' }}
-          >
-            {draftCount}
-          </div>
-        </div>
-      </div>
-
-      {/* Filters & Search Toolbar */}
-      <div className="card" style={{ padding: '1rem' }}>
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ flex: 1, minWidth: '220px' }}>
-            <Input
-              label="Search Releases"
-              placeholder="Search releases by name or version..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <div style={{ minWidth: '180px' }}>
-              <Select
-                label="Status Filter"
-                value={statusFilter}
-                onChange={(val) => setStatusFilter(String(val))}
-                options={[
-                  { value: '', label: 'All Statuses' },
-                  { value: ReleaseStatus.DRAFT, label: 'Draft' },
-                  { value: ReleaseStatus.PLANNED, label: 'Planned' },
-                  { value: ReleaseStatus.IN_PROGRESS, label: 'In Progress' },
-                  { value: ReleaseStatus.READY_FOR_DEPLOYMENT, label: 'Ready for Deployment' },
-                  { value: ReleaseStatus.DEPLOYED, label: 'Deployed' },
-                  { value: ReleaseStatus.FAILED, label: 'Failed' },
-                  { value: ReleaseStatus.CANCELLED, label: 'Cancelled' },
-                ]}
-              />
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    backgroundColor: 'var(--accent-primary)',
+                    color: '#ffffff',
+                    padding: '0.2rem 0.5rem',
+                    borderRadius: '4px',
+                    letterSpacing: '0.04em',
+                  }}
+                >
+                  {currentProject.key}
+                </span>
+                <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {currentProject.name}
+                </h2>
+              </div>
+              {currentProject.description && (
+                <p
+                  style={{
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.875rem',
+                    marginTop: '0.35rem',
+                  }}
+                >
+                  {currentProject.description}
+                </p>
+              )}
             </div>
 
-            <Button
-              variant="secondary"
-              onClick={() => refetch()}
-              title="Refresh"
-              loading={isFetching && !isLoading}
-              style={{ height: '44px' }}
-            >
-              Refresh
+            <Button variant="primary" onClick={() => setIsCreateOpen(true)}>
+              + New Release
             </Button>
           </div>
         </div>
+      ) : (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '1rem',
+          }}
+        >
+          <div>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              All Releases
+            </h2>
+            <p
+              style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.2rem' }}
+            >
+              Multi-project deployment pipelines and verification gates
+            </p>
+          </div>
+
+          <Button
+            variant="primary"
+            onClick={() => setIsCreateOpen(true)}
+            disabled={allProjects.length === 0}
+            title={allProjects.length === 0 ? 'Create a project first' : undefined}
+          >
+            + New Release
+          </Button>
+        </div>
+      )}
+
+      {/* Sleek Compact Status Pills Toolbar (Clean status presentation) */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          flexWrap: 'wrap',
+          backgroundColor: '#ffffff',
+          padding: '0.65rem 0.85rem',
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid var(--border-color)',
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setStatusFilter('')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            padding: '0.3rem 0.65rem',
+            borderRadius: '999px',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            border:
+              statusFilter === ''
+                ? '1.5px solid var(--accent-primary)'
+                : '1px solid var(--border-color)',
+            backgroundColor: statusFilter === '' ? 'var(--accent-light)' : 'transparent',
+            color: statusFilter === '' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          <span>All Releases</span>
+          <span
+            style={{
+              backgroundColor: statusFilter === '' ? 'var(--accent-primary)' : '#ede5dc',
+              color: statusFilter === '' ? '#ffffff' : 'var(--text-secondary)',
+              fontSize: '0.7rem',
+              padding: '0.05rem 0.35rem',
+              borderRadius: '999px',
+            }}
+          >
+            {totalCount}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStatusFilter(ReleaseStatus.IN_PROGRESS)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            padding: '0.3rem 0.65rem',
+            borderRadius: '999px',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            border:
+              statusFilter === ReleaseStatus.IN_PROGRESS
+                ? '1.5px solid #b45309'
+                : '1px solid var(--border-color)',
+            backgroundColor: statusFilter === ReleaseStatus.IN_PROGRESS ? '#fffbeb' : 'transparent',
+            color: statusFilter === ReleaseStatus.IN_PROGRESS ? '#b45309' : 'var(--text-secondary)',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          <span>In Progress</span>
+          <span
+            style={{
+              backgroundColor: statusFilter === ReleaseStatus.IN_PROGRESS ? '#b45309' : '#fef3c7',
+              color: statusFilter === ReleaseStatus.IN_PROGRESS ? '#ffffff' : '#92400e',
+              fontSize: '0.7rem',
+              padding: '0.05rem 0.35rem',
+              borderRadius: '999px',
+            }}
+          >
+            {inProgressCount}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStatusFilter(ReleaseStatus.READY_FOR_DEPLOYMENT)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            padding: '0.3rem 0.65rem',
+            borderRadius: '999px',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            border:
+              statusFilter === ReleaseStatus.READY_FOR_DEPLOYMENT
+                ? '1.5px solid #2563eb'
+                : '1px solid var(--border-color)',
+            backgroundColor:
+              statusFilter === ReleaseStatus.READY_FOR_DEPLOYMENT ? '#eff6ff' : 'transparent',
+            color:
+              statusFilter === ReleaseStatus.READY_FOR_DEPLOYMENT
+                ? '#1d4ed8'
+                : 'var(--text-secondary)',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          <span>Ready for Deploy</span>
+          <span
+            style={{
+              backgroundColor:
+                statusFilter === ReleaseStatus.READY_FOR_DEPLOYMENT ? '#2563eb' : '#dbeafe',
+              color: statusFilter === ReleaseStatus.READY_FOR_DEPLOYMENT ? '#ffffff' : '#1e40af',
+              fontSize: '0.7rem',
+              padding: '0.05rem 0.35rem',
+              borderRadius: '999px',
+            }}
+          >
+            {readyCount}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStatusFilter(ReleaseStatus.DEPLOYED)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            padding: '0.3rem 0.65rem',
+            borderRadius: '999px',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            border:
+              statusFilter === ReleaseStatus.DEPLOYED
+                ? '1.5px solid #16a34a'
+                : '1px solid var(--border-color)',
+            backgroundColor: statusFilter === ReleaseStatus.DEPLOYED ? '#f0fdf4' : 'transparent',
+            color: statusFilter === ReleaseStatus.DEPLOYED ? '#15803d' : 'var(--text-secondary)',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          <span>Deployed</span>
+          <span
+            style={{
+              backgroundColor: statusFilter === ReleaseStatus.DEPLOYED ? '#16a34a' : '#dcfce7',
+              color: statusFilter === ReleaseStatus.DEPLOYED ? '#ffffff' : '#166534',
+              fontSize: '0.7rem',
+              padding: '0.05rem 0.35rem',
+              borderRadius: '999px',
+            }}
+          >
+            {deployedCount}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStatusFilter(ReleaseStatus.DRAFT)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            padding: '0.3rem 0.65rem',
+            borderRadius: '999px',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            border:
+              statusFilter === ReleaseStatus.DRAFT
+                ? '1.5px solid #78716c'
+                : '1px solid var(--border-color)',
+            backgroundColor: statusFilter === ReleaseStatus.DRAFT ? '#f5f5f4' : 'transparent',
+            color: statusFilter === ReleaseStatus.DRAFT ? '#44403c' : 'var(--text-secondary)',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          <span>Drafts</span>
+          <span
+            style={{
+              backgroundColor: statusFilter === ReleaseStatus.DRAFT ? '#78716c' : '#e7e5e4',
+              color: statusFilter === ReleaseStatus.DRAFT ? '#ffffff' : '#44403c',
+              fontSize: '0.7rem',
+              padding: '0.05rem 0.35rem',
+              borderRadius: '999px',
+            }}
+          >
+            {draftCount}
+          </span>
+        </button>
+
+        {/* Search input inside toolbar */}
+        <div style={{ marginLeft: 'auto', minWidth: '220px' }}>
+          <Input
+            placeholder="Search releases by name or version..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <Button
+          variant="secondary"
+          onClick={() => refetch()}
+          title="Refresh"
+          loading={isFetching && !isLoading}
+          style={{ height: '44px' }}
+        >
+          Refresh
+        </Button>
       </div>
 
       {/* Releases List */}
@@ -219,7 +373,9 @@ export const ReleasesPage: React.FC = () => {
           >
             {searchTerm || statusFilter
               ? 'No releases match your current filters.'
-              : 'Create your first release to track checklist items and deployment steps.'}
+              : projectId
+                ? `Create the first release for project "${currentProject?.name}".`
+                : 'Create your first project and release to begin governance tracking.'}
           </p>
           <Button variant="primary" onClick={() => setIsCreateOpen(true)}>
             + Create First Release
@@ -260,12 +416,36 @@ export const ReleasesPage: React.FC = () => {
                     marginBottom: '0.5rem',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.6rem',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    {release.project && !projectId && (
+                      <span
+                        style={{
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          backgroundColor: '#ede5dc',
+                          color: 'var(--accent-primary)',
+                          padding: '0.15rem 0.4rem',
+                          borderRadius: '4px',
+                          letterSpacing: '0.02em',
+                        }}
+                      >
+                        {release.project.key}
+                      </span>
+                    )}
+
                     <h3
                       style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}
                     >
                       {release.name}
                     </h3>
+
                     <code
                       style={{
                         backgroundColor: 'var(--accent-light)',
@@ -328,7 +508,11 @@ export const ReleasesPage: React.FC = () => {
       )}
 
       {/* Create Modal */}
-      <CreateReleaseModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
+      <CreateReleaseModal
+        isOpen={isCreateOpen}
+        defaultProjectId={projectId}
+        onClose={() => setIsCreateOpen(false)}
+      />
     </div>
   );
 };

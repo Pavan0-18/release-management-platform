@@ -8,8 +8,20 @@ describe('ReleasesService', () => {
   let service: ReleasesService;
   let prisma: PrismaService;
 
+  const mockProject = {
+    id: 'proj-123',
+    name: 'Core Platform',
+    key: 'CORE',
+    description: 'Core backend services',
+    defaultChecklist: [{ title: 'Verify staging deployment', isRequired: true }],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
   const mockRelease = {
     id: 'rel-123',
+    projectId: 'proj-123',
+    project: mockProject,
     name: 'Q3 Major Release',
     version: 'v1.0.0',
     description: 'Initial production launch',
@@ -44,6 +56,9 @@ describe('ReleasesService', () => {
   };
 
   const mockPrismaService = {
+    project: {
+      findUnique: jest.fn().mockResolvedValue(mockProject),
+    },
     release: {
       findMany: jest.fn().mockResolvedValue([mockRelease]),
       findUnique: jest.fn().mockResolvedValue(mockRelease),
@@ -104,7 +119,9 @@ describe('ReleasesService', () => {
 
   describe('create', () => {
     it('should create a new release with steps', async () => {
+      jest.spyOn(prisma.release, 'findUnique').mockResolvedValueOnce(null); // uniqueness check
       const result = await service.create({
+        projectId: 'proj-123',
         name: 'New Release',
         version: 'v1.1.0',
         steps: [{ title: 'Verify staging' }],

@@ -16,6 +16,12 @@ const GET_RELEASES_GQL = `
   query GetReleases($filter: FilterReleasesInput) {
     releases(filter: $filter) {
       id
+      projectId
+      project {
+        id
+        name
+        key
+      }
       name
       version
       description
@@ -34,6 +40,17 @@ const GET_RELEASE_GQL = `
   query GetRelease($id: ID!) {
     release(id: $id) {
       id
+      projectId
+      project {
+        id
+        name
+        key
+        defaultChecklist {
+          title
+          description
+          isRequired
+        }
+      }
       name
       version
       description
@@ -50,6 +67,7 @@ const GET_RELEASE_GQL = `
         description
         isRequired
         status
+        order
         createdAt
         updatedAt
       }
@@ -61,6 +79,12 @@ const CREATE_RELEASE_GQL = `
   mutation CreateRelease($input: CreateReleaseInput!) {
     createRelease(input: $input) {
       id
+      projectId
+      project {
+        id
+        name
+        key
+      }
       name
       version
       description
@@ -124,6 +148,7 @@ const DELETE_RELEASE_STEP_GQL = `
 `;
 
 export interface ReleaseFilterParams {
+  projectId?: string;
   status?: ReleaseStatus;
   search?: string;
 }
@@ -143,6 +168,7 @@ export function useReleases(filter?: ReleaseFilterParams) {
     queryFn: async () => {
       const data = await requestGraphQL<{ releases: Release[] }>(GET_RELEASES_GQL, {
         filter: {
+          projectId: filter?.projectId || undefined,
           status: filter?.status || undefined,
           search: filter?.search || undefined,
         },
@@ -177,9 +203,10 @@ export function useCreateRelease() {
     },
     onSuccess: (newRelease) => {
       queryClient.invalidateQueries({ queryKey: releaseKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       toast.success(
         `Release "${newRelease.name}" created`,
-        `Version ${newRelease.version} is now available in your release pipeline.`,
+        `Version ${newRelease.version} is now available in project [${newRelease.project?.key || 'PROJECT'}].`,
       );
     },
     onError: (err: Error) => {
@@ -223,6 +250,7 @@ export function useDeleteRelease() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: releaseKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       toast.success('Release deleted', 'The release record and checklist steps have been removed.');
     },
     onError: (err: Error) => {

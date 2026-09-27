@@ -18,6 +18,10 @@ export const router = createBrowserRouter([
         element: <ReleasesPage />,
       },
       {
+        path: 'projects/:projectId',
+        element: <ReleasesPage />,
+      },
+      {
         path: 'releases/:id',
         element: <ReleaseDetailPage />,
       },
