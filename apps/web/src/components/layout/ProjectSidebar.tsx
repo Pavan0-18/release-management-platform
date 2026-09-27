@@ -30,8 +30,8 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
     <aside
       className={`project-sidebar-container ${isMobileOpen ? 'open' : ''}`}
       style={{
-        width: '275px',
-        minWidth: '275px',
+        width: '260px',
+        minWidth: '260px',
         backgroundColor: '#ffffff',
         borderRight: '1px solid var(--border-color)',
         display: 'flex',
@@ -43,47 +43,36 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
         zIndex: 10,
       }}
     >
-      {/* Platform Branding Header (RM icon removed as requested) */}
+      {/* Platform Branding Header */}
       <div
         style={{
-          padding: '0.85rem 1rem',
+          padding: '0 1rem',
           borderBottom: '1px solid var(--border-subtle)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          backgroundColor: '#faf7f2',
-          height: '60px',
+          backgroundColor: '#ffffff',
+          height: '56px',
           boxSizing: 'border-box',
         }}
       >
-        <div>
-          <h1
-            style={{
-              fontSize: '0.95rem',
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              lineHeight: 1.2,
-              margin: 0,
-            }}
-          >
-            Release Hub
-          </h1>
-          <span
-            style={{
-              fontSize: '0.7rem',
-              color: 'var(--text-muted)',
-              fontWeight: 500,
-            }}
-          >
-            Platform Governance
-          </span>
-        </div>
+        <h1
+          style={{
+            fontSize: '1rem',
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            letterSpacing: '-0.01em',
+            margin: 0,
+          }}
+        >
+          Release Hub
+        </h1>
 
         <Button
           variant="primary"
           size="sm"
           onClick={() => setIsCreateOpen(true)}
-          style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', height: '32px' }}
+          style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', height: '30px' }}
           title="Create New Project"
         >
           + Project
@@ -91,7 +80,7 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
       </div>
 
       {/* Project Search Field */}
-      <div style={{ padding: '0.75rem 0.85rem 0.4rem 0.85rem' }}>
+      <div style={{ padding: '0.65rem 0.75rem 0.35rem 0.75rem' }}>
         <Input
           label="Search projects..."
           innerLabel={true}
@@ -100,35 +89,13 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
         />
       </div>
 
-      {/* Projects Navigation Section */}
+      {/* Project Items List - Single Line layout */}
       <div
         style={{
-          padding: '0.25rem 0.85rem 0.4rem 0.85rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <span
-          style={{
-            fontSize: '0.7rem',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            color: 'var(--text-muted)',
-            letterSpacing: '0.05em',
-          }}
-        >
-          Projects ({projects.length})
-        </span>
-      </div>
-
-      {/* Project Items List - Single Line layout with constant height */}
-      <div
-        style={{
-          padding: '0 0.65rem 0.75rem 0.65rem',
+          padding: '0.35rem 0.6rem 0.75rem 0.6rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.3rem',
+          gap: '0.25rem',
           flex: 1,
           overflowY: 'auto',
         }}
@@ -142,7 +109,7 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
               fontSize: '0.8rem',
             }}
           >
-            Loading projects...
+            Loading...
           </div>
         ) : filteredProjects.length === 0 ? (
           <div
@@ -151,14 +118,10 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
               textAlign: 'center',
               color: 'var(--text-muted)',
               fontSize: '0.8rem',
-              backgroundColor: 'var(--bg-primary)',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px dashed var(--border-color)',
-              margin: '0.5rem 0.25rem',
             }}
           >
             <p style={{ margin: 0, marginBottom: '0.75rem' }}>
-              {search ? 'No matching projects' : 'No projects yet'}
+              {search ? 'No matches' : 'No projects'}
             </p>
             <Button
               variant="primary"
@@ -173,7 +136,6 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
           filteredProjects.map((project) => {
             const isProjectActive = location.pathname.includes(`/projects/${project.id}`);
             const isMicroservices = project.nature === ProjectNature.MICROSERVICES;
-            const serviceCount = project.services?.length || 0;
 
             return (
               <NavLink
@@ -250,7 +212,7 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
                         padding: '0.05rem 0.3rem',
                         borderRadius: '3px',
                       }}
-                      title={`Microservices (${serviceCount} services)`}
+                      title="Microservices project"
                     >
                       MS
                     </span>
@@ -272,42 +234,6 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
             );
           })
         )}
-      </div>
-
-      {/* Footer System Status */}
-      <div
-        style={{
-          padding: '0.75rem 1rem',
-          borderTop: '1px solid var(--border-subtle)',
-          backgroundColor: '#faf7f2',
-          fontSize: '0.75rem',
-          color: 'var(--text-muted)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          height: '44px',
-          boxSizing: 'border-box',
-        }}
-      >
-        <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-          <span
-            style={{
-              width: '7px',
-              height: '7px',
-              borderRadius: '50%',
-              backgroundColor: '#16a34a',
-            }}
-          />
-          API Connected
-        </span>
-        <a
-          href="http://localhost:3000/graphql"
-          target="_blank"
-          rel="noreferrer"
-          style={{ color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 600 }}
-        >
-          GraphQL &rarr;
-        </a>
       </div>
 
       {/* Create Project Modal */}
